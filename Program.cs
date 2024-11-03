@@ -14,11 +14,14 @@ namespace polmon
     {
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";
-        public static int svRefreshTime = 1000; // in milliseconds
+        public static int svRefreshTime = 500; // in milliseconds
 
         static async Task Main(string[] args)
         {
-            // Initialize performance counters
+            Console.Title = "PolMon (mbnq.pl)";
+            Console.WriteLine("Init: started");
+
+            // performance counters
             var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             var ramCounter = new PerformanceCounter("Memory", "Available MBytes");
             var diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
@@ -41,6 +44,7 @@ namespace polmon
             listener.Prefixes.Add($"http://{svIP}:{svPort}/");
             listener.Start();
 
+            Console.WriteLine("Init: ok!");
             Console.WriteLine($"Server started, listening on port {svPort}");
 
             while (true)

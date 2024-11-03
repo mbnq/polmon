@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
+using System.Management; // For ManagementObjectSearcher
 
 namespace polmon
 {
@@ -11,8 +13,10 @@ namespace polmon
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";
         public static int svRefreshTime = 1000; // in milliseconds
+
         static async Task Main(string[] args)
         {
+            // Initialize performance counters
             var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             var ramCounter = new PerformanceCounter("Memory", "Available MBytes");
             var networkCategory = new PerformanceCounterCategory("Network Interface");
@@ -60,37 +64,69 @@ namespace polmon
                     threadCount += proc.Threads.Count;
                 }
 
-                // Build HTML response
-                string html = $@"
-                <html>
-                    <head>
-                        <meta http-equiv='refresh' content='5'>
-                        <title>Server Monitor</title>
-                        <style>
-                            body {{ font-family: Arial, sans-serif; }}
-                            h1 {{ color: #333; }}
-                            p {{ font-size: 1.2em; }}
-                        </style>
-                    </head>
-                    <body>
-                        <h1>Server Monitor</h1>
-                        <p>CPU Usage: {cpuUsage:N2}%</p>
-                        <p>Available Memory: {ramAvailable:N0} MB</p>
-                        <p>Network Usage: {networkUsage:N0} Bytes/sec</p>
-                        <p>Disk Read: {diskRead:N0} Bytes/sec</p>
-                        <p>Disk Write: {diskWrite:N0} Bytes/sec</p>
-                        <p>Paging File Usage: {pagingUsage:N2}%</p>
-                        <p>System Uptime: {uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s</p>
-                        <p>Process Count: {processCount}</p>
-                        <p>Thread Count: {threadCount}</p>
-                    </body>
-                </html>";
+                // Get total physical memory in MB
+                var totalRam = GetTotalPhysicalMemory();
+
+                // Calculate used RAM
+                var ramUsed = totalRam - ramAvailable;
+                var ramUsagePercent = (ramUsed / totalRam) * 100;
+
+                // Format bytes
+                string networkUsageFormatted = FormatBytes(networkUsage);
+                string diskReadFormatted = FormatBytes(diskRead);
+                string diskWriteFormatted = FormatBytes(diskWrite);
+
+                // Since JavaScript expects numeric value for network gauge, we need to pass networkUsage as numeric
+                string networkUsageFormattedNumeric = networkUsage.ToString("N0", CultureInfo.InvariantCulture);
+
+                // Get HTML content
+                string html = HtmlTemplate.GetHtml(
+                    cpuUsage,
+                    ramUsed,
+                    totalRam,
+                    ramUsagePercent,
+                    networkUsageFormatted,
+                    diskReadFormatted,
+                    diskWriteFormatted,
+                    pagingUsage,
+                    uptimeSpan,
+                    processCount,
+                    threadCount);
+
+                // Replace {networkUsageFormattedNumeric} in JavaScript code
+                html = html.Replace("{networkUsageFormattedNumeric}", networkUsageFormattedNumeric);
 
                 byte[] buffer = Encoding.UTF8.GetBytes(html);
+                response.ContentType = "text/html; charset=utf-8";
+                response.ContentEncoding = Encoding.UTF8;
                 response.ContentLength64 = buffer.Length;
                 await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
                 response.Close();
             }
+        }
+
+        // Helper method to get total physical memory in MB
+        static float GetTotalPhysicalMemory()
+        {
+            var searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
+            foreach (ManagementObject obj in searcher.Get())
+            {
+                return Convert.ToSingle(obj["TotalVisibleMemorySize"]) / 1024; // Convert to MB
+            }
+            return 0;
+        }
+
+        // Helper method to format bytes
+        static string FormatBytes(float bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            int order = 0;
+            while (bytes >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                bytes = bytes / 1024;
+            }
+            return String.Format(CultureInfo.InvariantCulture, "{0:0.##} {1}", bytes, sizes[order]);
         }
     }
 }

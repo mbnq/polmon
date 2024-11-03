@@ -55,8 +55,7 @@ namespace polmon
             }
 
             Console.WriteLine("Init: ok!");
-            Console.WriteLine($"Starting Configuration - IP: {svIP}, Port: {svPort}, Refresh Time: {svRefreshTime}ms");
-            Console.WriteLine($"Server started, listening on {svIP}:{svPort}");
+            Console.WriteLine($"Server started: {svIP}, Port: {svPort}, Refresh Time: {svRefreshTime}ms");
 
             while (true)
             {

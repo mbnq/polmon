@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Management;
 using System.Linq; // For LINQ methods
 using Newtonsoft.Json; // Using Newtonsoft.Json for JSON serialization
+using System.IO; // For IOException
 
 namespace polmon
 {
@@ -18,10 +19,16 @@ namespace polmon
 
         static async Task Main(string[] args)
         {
+            // Parse command-line arguments
+            ParseArguments(args);
+
+            // Set Console Window Parameters (Optional)
+            ConfigureConsoleWindow();
+
             Console.Title = "PolMon (mbnq.pl)";
             Console.WriteLine("Init: started");
 
-            // performance counters
+            // Initialize performance counters
             var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             var ramCounter = new PerformanceCounter("Memory", "Available MBytes");
             var diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
@@ -42,14 +49,37 @@ namespace polmon
 
             var listener = new HttpListener();
             listener.Prefixes.Add($"http://{svIP}:{svPort}/");
-            listener.Start();
+            try
+            {
+                listener.Start();
+            }
+            catch (HttpListenerException ex)
+            {
+                Console.WriteLine($"Error starting HTTP listener: {ex.Message}");
+                return;
+            }
 
             Console.WriteLine("Init: ok!");
-            Console.WriteLine($"Server started, listening on port {svPort}");
+            Console.WriteLine($"Server started, listening on {svIP}:{svPort}");
 
             while (true)
             {
-                var context = await listener.GetContextAsync();
+                HttpListenerContext context;
+                try
+                {
+                    context = await listener.GetContextAsync();
+                }
+                catch (HttpListenerException ex)
+                {
+                    Console.WriteLine($"HTTP Listener Exception: {ex.Message}");
+                    break; // Exit the loop if the listener is stopped
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Console.WriteLine($"Invalid Operation: {ex.Message}");
+                    break; // Exit the loop if the listener is stopped
+                }
+
                 var response = context.Response;
                 var request = context.Request;
 
@@ -64,6 +94,7 @@ namespace polmon
                     counter.NextValue();
                 }
 
+                // Short delay to allow counters to update
                 await Task.Delay(svRefreshTime);
                 Console.WriteLine($"Request received: {request.RawUrl}");
 
@@ -118,7 +149,14 @@ namespace polmon
                     response.ContentType = "application/json; charset=utf-8";
                     response.ContentEncoding = Encoding.UTF8;
                     response.ContentLength64 = buffer.Length;
-                    await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    try
+                    {
+                        await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    }
+                    catch (HttpListenerException ex)
+                    {
+                        Console.WriteLine($"Error writing response: {ex.Message}");
+                    }
                     response.Close();
                 }
                 else
@@ -142,9 +180,119 @@ namespace polmon
                     response.ContentType = "text/html; charset=utf-8";
                     response.ContentEncoding = Encoding.UTF8;
                     response.ContentLength64 = buffer.Length;
-                    await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    try
+                    {
+                        await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    }
+                    catch (HttpListenerException ex)
+                    {
+                        Console.WriteLine($"Error writing response: {ex.Message}");
+                    }
                     response.Close();
                 }
+            }
+
+            // Shutdown procedures
+            listener.Close();
+        }
+
+        // Move helper methods outside of Main to avoid static local functions
+        static void ParseArguments(string[] cmdArgs)
+        {
+            for (int i = 0; i < cmdArgs.Length; i++)
+            {
+                switch (cmdArgs[i].ToLower())
+                {
+                    case "-port":
+                        if (i + 1 < cmdArgs.Length && int.TryParse(cmdArgs[i + 1], out int port))
+                        {
+                            svPort = port;
+                            i++; // Skip next argument as it's the value
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid or missing value for -port. Using default port 8080.");
+                        }
+                        break;
+                    case "-ip":
+                        if (i + 1 < cmdArgs.Length && IsValidIPAddress(cmdArgs[i + 1]))
+                        {
+                            svIP = cmdArgs[i + 1];
+                            i++;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid or missing value for -ip. Using default IP 127.0.0.1.");
+                        }
+                        break;
+                    case "-rtime":
+                        if (i + 1 < cmdArgs.Length && int.TryParse(cmdArgs[i + 1], out int rtime))
+                        {
+                            svRefreshTime = rtime;
+                            i++;
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid or missing value for -rtime. Using default refresh time 500ms.");
+                        }
+                        break;
+                    case "-help":
+                    case "--help":
+                        DisplayHelp();
+                        Environment.Exit(0);
+                        break;
+                    default:
+                        Console.WriteLine($"Unknown argument: {cmdArgs[i]}");
+                        break;
+                }
+            }
+
+            Console.WriteLine($"Configuration - IP: {svIP}, Port: {svPort}, Refresh Time: {svRefreshTime}ms");
+        }
+
+        static void DisplayHelp()
+        {
+            Console.WriteLine("PolMon (mbnq.pl) - Server Monitor");
+            Console.WriteLine("Usage:");
+            Console.WriteLine("  polmon.exe [options]");
+            Console.WriteLine();
+            Console.WriteLine("Options:");
+            Console.WriteLine("  -port <number>    Set the listening port (default: 8080)");
+            Console.WriteLine("  -ip <address>     Set the IP address to listen on (default: 127.0.0.1)");
+            Console.WriteLine("  -rtime <number>   Set the refresh time in milliseconds (default: 500)");
+            Console.WriteLine("  -help, --help     Display this help message");
+        }
+
+        static bool IsValidIPAddress(string ip)
+        {
+            return System.Net.IPAddress.TryParse(ip, out _);
+        }
+
+        static void ConfigureConsoleWindow()
+        {
+            try
+            {
+                // Set the window size (columns, rows)
+                Console.SetWindowSize(100, 40);
+
+                // Set the buffer size (columns, rows)
+                Console.SetBufferSize(100, 1000);
+
+                // Optionally, set the console colors
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.BackgroundColor = ConsoleColor.Black;
+                Console.Clear(); // Apply background color
+
+                // Hide the cursor for a cleaner display
+                Console.CursorVisible = false;
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Console.WriteLine($"Error configuring console window: {ex.Message}");
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine($"IO Error configuring console window: {ex.Message}");
             }
         }
 

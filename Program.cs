@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Globalization;
 using System.Management;
 using System.Linq; // For LINQ methods
+using Newtonsoft.Json; // Using Newtonsoft.Json for JSON serialization
 
 namespace polmon
 {
@@ -46,6 +47,7 @@ namespace polmon
             {
                 var context = await listener.GetContextAsync();
                 var response = context.Response;
+                var request = context.Request;
 
                 // Initialize counters
                 cpuCounter.NextValue();
@@ -59,7 +61,7 @@ namespace polmon
                 }
 
                 await Task.Delay(svRefreshTime);
-                Console.WriteLine("Request received");
+                Console.WriteLine($"Request received: {request.RawUrl}");
 
                 // Gather data
                 var cpuUsage = cpuCounter.NextValue();
@@ -88,27 +90,57 @@ namespace polmon
                 string diskReadFormatted = FormatBytes(diskRead);
                 string diskWriteFormatted = FormatBytes(diskWrite);
 
-                // Get HTML content
-                string html = HtmlTemplate.GetHtml(
-                    cpuUsage,
-                    ramUsed,
-                    totalRam,
-                    ramUsagePercent,
-                    networkUsage,
-                    networkUsageFormatted,
-                    diskReadFormatted,
-                    diskWriteFormatted,
-                    pagingUsage,
-                    uptimeSpan,
-                    processCount,
-                    threadCount);
+                if (request.RawUrl == "/data")
+                {
+                    // Serve JSON data
+                    var data = new
+                    {
+                        cpuUsage,
+                        ramUsed,
+                        totalRam,
+                        ramUsagePercent,
+                        networkUsage,
+                        networkUsageFormatted,
+                        diskReadFormatted,
+                        diskWriteFormatted,
+                        pagingUsage,
+                        uptime = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s",
+                        processCount,
+                        threadCount
+                    };
 
-                byte[] buffer = Encoding.UTF8.GetBytes(html);
-                response.ContentType = "text/html; charset=utf-8";
-                response.ContentEncoding = Encoding.UTF8;
-                response.ContentLength64 = buffer.Length;
-                await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-                response.Close();
+                    string jsonData = JsonConvert.SerializeObject(data);
+                    byte[] buffer = Encoding.UTF8.GetBytes(jsonData);
+                    response.ContentType = "application/json; charset=utf-8";
+                    response.ContentEncoding = Encoding.UTF8;
+                    response.ContentLength64 = buffer.Length;
+                    await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    response.Close();
+                }
+                else
+                {
+                    // Serve HTML content
+                    string html = HtmlTemplate.GetHtml(
+                        cpuUsage,
+                        ramUsed,
+                        totalRam,
+                        ramUsagePercent,
+                        networkUsage,
+                        networkUsageFormatted,
+                        diskReadFormatted,
+                        diskWriteFormatted,
+                        pagingUsage,
+                        uptimeSpan,
+                        processCount,
+                        threadCount);
+
+                    byte[] buffer = Encoding.UTF8.GetBytes(html);
+                    response.ContentType = "text/html; charset=utf-8";
+                    response.ContentEncoding = Encoding.UTF8;
+                    response.ContentLength64 = buffer.Length;
+                    await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    response.Close();
+                }
             }
         }
 

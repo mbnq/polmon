@@ -2,7 +2,6 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="5">
     <title>Server Monitor</title>
     <style>
         /* Your existing CSS styles */
@@ -129,31 +128,25 @@
             </div>
         </div>
         <div class="info">
-            <p><strong>Disk Read:</strong> {{diskReadFormatted}}/s</p>
-            <p><strong>Disk Write:</strong> {{diskWriteFormatted}}/s</p>
-            <p><strong>System Uptime:</strong> {{uptime}}</p>
-            <p><strong>Process Count:</strong> {{processCount}}</p>
-            <p><strong>Thread Count:</strong> {{threadCount}}</p>
+            <p><strong>Disk Read:</strong> <span id="diskRead"></span>/s</p>
+            <p><strong>Disk Write:</strong> <span id="diskWrite"></span>/s</p>
+            <p><strong>System Uptime:</strong> <span id="uptime"></span></p>
+            <p><strong>Process Count:</strong> <span id="processCount"></span></p>
+            <p><strong>Thread Count:</strong> <span id="threadCount"></span></p>
         </div>
     </div>
     <script>
-        // Parse placeholders as numbers
-        var cpuUsageValue = parseFloat('{{cpuUsage}}');
-        var ramUsagePercentValue = parseFloat('{{ramUsagePercent}}');
-        var networkUsageNumericValue = parseFloat('{{networkUsageNumeric}}');
-        var pagingUsageValue = parseFloat('{{pagingUsage}}');
-
         // Max network speed in Bytes per second
+        function getMaxNetworkSpeed() {
+            return 125000000; // Adjust this value based on your network speed in Bytes/sec
+        }
+
         var maxNetworkSpeed = getMaxNetworkSpeed();
 
-        // Convert network usage to percentage of max speed
-        var networkUsagePercent = (networkUsageNumericValue / maxNetworkSpeed) * 100;
-        if (networkUsagePercent > 100) networkUsagePercent = 100; // Cap at 100%
-
-        // Initialize JustGage gauges
+        // Initialize JustGage gauges with initial value 0
         var cpuGauge = new JustGage({
             id: "cpuGaugeContainer",
-            value: cpuUsageValue,
+            value: 0,
             min: 0,
             max: 100,
             title: "",
@@ -163,12 +156,14 @@
             valueFontColor: "#f0f0f0",
             titleFontColor: "#f0f0f0",
             labelFontColor: "#f0f0f0",
-            gaugeWidthScale: 0.6
+            gaugeWidthScale: 0.6,
+            noGradient: true,
+            counter: true
         });
 
         var ramGauge = new JustGage({
             id: "ramGaugeContainer",
-            value: ramUsagePercentValue,
+            value: 0,
             min: 0,
             max: 100,
             title: "",
@@ -178,12 +173,14 @@
             valueFontColor: "#f0f0f0",
             titleFontColor: "#f0f0f0",
             labelFontColor: "#f0f0f0",
-            gaugeWidthScale: 0.6
+            gaugeWidthScale: 0.6,
+            noGradient: true,
+            counter: true
         });
 
         var networkGauge = new JustGage({
             id: "networkGaugeContainer",
-            value: networkUsagePercent,
+            value: 0,
             min: 0,
             max: 100,
             title: "",
@@ -193,12 +190,14 @@
             valueFontColor: "#f0f0f0",
             titleFontColor: "#f0f0f0",
             labelFontColor: "#f0f0f0",
-            gaugeWidthScale: 0.6
+            gaugeWidthScale: 0.6,
+            noGradient: true,
+            counter: true
         });
 
         var pageFileGauge = new JustGage({
             id: "pageFileGaugeContainer",
-            value: pagingUsageValue,
+            value: 0,
             min: 0,
             max: 100,
             title: "",
@@ -208,12 +207,39 @@
             valueFontColor: "#f0f0f0",
             titleFontColor: "#f0f0f0",
             labelFontColor: "#f0f0f0",
-            gaugeWidthScale: 0.6
+            gaugeWidthScale: 0.6,
+            noGradient: true,
+            counter: true
         });
 
-        function getMaxNetworkSpeed() {
-            return 125000000; // Adjust this value based on your network speed in Bytes/sec
+        // Function to fetch data from the server
+        async function fetchData() {
+            try {
+                const response = await fetch('/data');
+                const data = await response.json();
+
+                // Update gauges
+                cpuGauge.refresh(data.cpuUsage);
+                ramGauge.refresh(data.ramUsagePercent);
+                var networkUsagePercent = (data.networkUsage / maxNetworkSpeed) * 100;
+                if (networkUsagePercent > 100) networkUsagePercent = 100; // Cap at 100%
+                networkGauge.refresh(networkUsagePercent);
+                pageFileGauge.refresh(data.pagingUsage);
+
+                // Update text information
+                document.getElementById('diskRead').innerText = data.diskReadFormatted;
+                document.getElementById('diskWrite').innerText = data.diskWriteFormatted;
+                document.getElementById('uptime').innerText = data.uptime;
+                document.getElementById('processCount').innerText = data.processCount;
+                document.getElementById('threadCount').innerText = data.threadCount;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
         }
+
+        // Fetch data immediately and then every 5 seconds
+        fetchData();
+        setInterval(fetchData, 5000);
     </script>
 </body>
 </html>

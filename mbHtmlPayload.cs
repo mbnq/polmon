@@ -11,7 +11,7 @@ namespace polmon
             float ramUsed,
             float totalRam,
             float ramUsagePercent,
-            float networkUsage, // Added this parameter
+            float networkUsage, // Ensure this parameter is present
             string networkUsageFormatted,
             string diskReadFormatted,
             string diskWriteFormatted,
@@ -27,7 +27,7 @@ namespace polmon
             // Read the HTML content from index.html
             string html = File.ReadAllText(htmlFilePath);
 
-            // Format values using InvariantCulture
+            // Format values
             string cpuUsageStr = cpuUsage.ToString("F2", CultureInfo.InvariantCulture);
             string ramUsedStr = ramUsed.ToString("F0", CultureInfo.InvariantCulture);
             string totalRamStr = totalRam.ToString("F0", CultureInfo.InvariantCulture);

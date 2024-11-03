@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
 using System.Management;
+using System.Linq; // For LINQ methods
 
 namespace polmon
 {
@@ -19,14 +20,21 @@ namespace polmon
             // Initialize performance counters
             var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             var ramCounter = new PerformanceCounter("Memory", "Available MBytes");
-            var networkCategory = new PerformanceCounterCategory("Network Interface");
-            var instanceNames = networkCategory.GetInstanceNames();
-            var networkCounter = new PerformanceCounter("Network Interface", "Bytes Total/sec", instanceNames[0]);
             var diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
             var diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
-            var pagingCounter = new PerformanceCounter("Paging File", "% Usage", "_Total");
             var uptimeCounter = new PerformanceCounter("System", "System Up Time");
             uptimeCounter.NextValue(); // Initialize uptime counter
+
+            // Initialize network counters for all instances
+            var networkCategory = new PerformanceCounterCategory("Network Interface");
+            var instanceNames = networkCategory.GetInstanceNames();
+            var networkCounters = instanceNames.Select(name => new PerformanceCounter("Network Interface", "Bytes Total/sec", name)).ToArray();
+
+            // Initialize network counters
+            foreach (var counter in networkCounters)
+            {
+                counter.NextValue();
+            }
 
             var listener = new HttpListener();
             listener.Prefixes.Add($"http://{svIP}:{svPort}/");
@@ -41,10 +49,14 @@ namespace polmon
 
                 // Initialize counters
                 cpuCounter.NextValue();
-                networkCounter.NextValue();
                 diskReadCounter.NextValue();
                 diskWriteCounter.NextValue();
-                pagingCounter.NextValue();
+                ramCounter.NextValue();
+                uptimeCounter.NextValue();
+                foreach (var counter in networkCounters)
+                {
+                    counter.NextValue();
+                }
 
                 await Task.Delay(svRefreshTime);
                 Console.WriteLine("Request received");
@@ -52,10 +64,10 @@ namespace polmon
                 // Gather data
                 var cpuUsage = cpuCounter.NextValue();
                 var ramAvailable = ramCounter.NextValue();
-                var networkUsage = networkCounter.NextValue();
+                var networkUsage = networkCounters.Sum(counter => counter.NextValue());
                 var diskRead = diskReadCounter.NextValue();
                 var diskWrite = diskWriteCounter.NextValue();
-                var pagingUsage = pagingCounter.NextValue();
+                var pagingUsage = GetPagingFileUsagePercent(); // Use WMI method
                 TimeSpan uptimeSpan = TimeSpan.FromSeconds(uptimeCounter.NextValue());
                 var processCount = Process.GetProcesses().Length;
                 int threadCount = 0;
@@ -122,6 +134,25 @@ namespace polmon
                 bytes = bytes / 1024;
             }
             return String.Format(CultureInfo.InvariantCulture, "{0:0.##} {1}", bytes, sizes[order]);
+        }
+
+        // Method to get paging file usage percentage
+        static float GetPagingFileUsagePercent()
+        {
+            float totalSize = 0;
+            float currentUsage = 0;
+            var searcher = new ManagementObjectSearcher("SELECT AllocatedBaseSize, CurrentUsage FROM Win32_PageFileUsage");
+            foreach (ManagementObject obj in searcher.Get())
+            {
+                totalSize += Convert.ToUInt32(obj["AllocatedBaseSize"]);
+                currentUsage += Convert.ToUInt32(obj["CurrentUsage"]);
+            }
+
+            if (totalSize > 0)
+            {
+                return (currentUsage / totalSize) * 100;
+            }
+            return 0;
         }
     }
 }

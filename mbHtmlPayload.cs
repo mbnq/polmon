@@ -28,13 +28,15 @@ namespace polmon
             string html = File.ReadAllText(htmlFilePath);
 
             // Format values using InvariantCulture
-            string cpuUsageStr = cpuUsage.ToString("N2", CultureInfo.InvariantCulture);
-            string ramUsedStr = ramUsed.ToString("N0", CultureInfo.InvariantCulture);
-            string totalRamStr = totalRam.ToString("N0", CultureInfo.InvariantCulture);
-            string ramUsagePercentStr = ramUsagePercent.ToString("N2", CultureInfo.InvariantCulture);
-            string pagingUsageStr = pagingUsage.ToString("N2", CultureInfo.InvariantCulture);
+            string cpuUsageStr = cpuUsage.ToString("F2", CultureInfo.InvariantCulture);
+            string ramUsedStr = ramUsed.ToString("F0", CultureInfo.InvariantCulture);
+            string totalRamStr = totalRam.ToString("F0", CultureInfo.InvariantCulture);
+            string ramUsagePercentStr = ramUsagePercent.ToString("F2", CultureInfo.InvariantCulture);
+            string pagingUsageStr = pagingUsage.ToString("F2", CultureInfo.InvariantCulture);
             string uptimeStr = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s";
-            string networkUsageNumericStr = networkUsage.ToString("N0", CultureInfo.InvariantCulture);
+            string networkUsageNumericStr = networkUsage.ToString("F2", CultureInfo.InvariantCulture);
+            string processCountStr = processCount.ToString(CultureInfo.InvariantCulture);
+            string threadCountStr = threadCount.ToString(CultureInfo.InvariantCulture);
 
             // Replace placeholders with actual values
             html = html.Replace("{{cpuUsage}}", cpuUsageStr)
@@ -46,8 +48,8 @@ namespace polmon
                        .Replace("{{diskWriteFormatted}}", diskWriteFormatted)
                        .Replace("{{pagingUsage}}", pagingUsageStr)
                        .Replace("{{uptime}}", uptimeStr)
-                       .Replace("{{processCount}}", processCount.ToString())
-                       .Replace("{{threadCount}}", threadCount.ToString())
+                       .Replace("{{processCount}}", processCountStr)
+                       .Replace("{{threadCount}}", threadCountStr)
                        .Replace("{{networkUsageNumeric}}", networkUsageNumericStr);
 
             return html;

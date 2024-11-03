@@ -4,7 +4,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
-using System.Management; // For ManagementObjectSearcher
+using System.Management;
 
 namespace polmon
 {
@@ -76,16 +76,13 @@ namespace polmon
                 string diskReadFormatted = FormatBytes(diskRead);
                 string diskWriteFormatted = FormatBytes(diskWrite);
 
-                // Since JavaScript expects numeric value for network gauge, we need to pass networkUsage as numeric
-                string networkUsageFormattedNumeric = networkUsage.ToString("N0", CultureInfo.InvariantCulture);
-
                 // Get HTML content
                 string html = HtmlTemplate.GetHtml(
                     cpuUsage,
                     ramUsed,
                     totalRam,
                     ramUsagePercent,
-                    networkUsage, // Pass networkUsage here
+                    networkUsage,
                     networkUsageFormatted,
                     diskReadFormatted,
                     diskWriteFormatted,
@@ -93,9 +90,6 @@ namespace polmon
                     uptimeSpan,
                     processCount,
                     threadCount);
-
-                // Replace {networkUsageFormattedNumeric} in JavaScript code
-                html = html.Replace("{networkUsageFormattedNumeric}", networkUsageFormattedNumeric);
 
                 byte[] buffer = Encoding.UTF8.GetBytes(html);
                 response.ContentType = "text/html; charset=utf-8";

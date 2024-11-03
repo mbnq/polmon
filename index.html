@@ -174,15 +174,27 @@
             context.stroke();
         }
 
-        // Draw gauges
-        drawGauge('cpuCanvas', {{cpuUsage}}, 100, '#FF6347'); // Tomato color
-        drawGauge('ramCanvas', {{ramUsagePercent}}, 100, '#4682B4'); // SteelBlue color
-        drawGauge('networkCanvas', {{networkUsageNumeric}}, getMaxNetworkSpeed(), '#3CB371'); // MediumSeaGreen
-        drawGauge('pageFileCanvas', {{pagingUsage}}, 100, '#FFD700'); // Gold color
-
         function getMaxNetworkSpeed() {
-            return 125000000; // Adjust this value based on your network speed in Bytes/sec (e.g., 1 Gbps = 125,000,000 Bytes/sec)
+            return 125000000; // Adjust this value based on your network speed in Bytes/sec
         }
+
+        // Parse placeholders as numbers
+        var cpuUsageValue = parseFloat('{{cpuUsage}}');
+        var ramUsagePercentValue = parseFloat('{{ramUsagePercent}}');
+        var networkUsageNumericValue = parseFloat('{{networkUsageNumeric}}');
+        var pagingUsageValue = parseFloat('{{pagingUsage}}');
+
+        // Debug: Log values to console
+        console.log('CPU Usage:', cpuUsageValue);
+        console.log('RAM Usage Percent:', ramUsagePercentValue);
+        console.log('Network Usage Numeric:', networkUsageNumericValue);
+        console.log('Paging Usage:', pagingUsageValue);
+
+        // Draw gauges using parsed values
+        drawGauge('cpuCanvas', cpuUsageValue, 100, '#FF6347'); // Tomato color
+        drawGauge('ramCanvas', ramUsagePercentValue, 100, '#4682B4'); // SteelBlue color
+        drawGauge('networkCanvas', networkUsageNumericValue, getMaxNetworkSpeed(), '#3CB371'); // MediumSeaGreen
+        drawGauge('pageFileCanvas', pagingUsageValue, 100, '#FFD700'); // Gold color
     </script>
 </body>
 </html>

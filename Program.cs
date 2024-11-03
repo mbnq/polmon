@@ -19,13 +19,8 @@ namespace polmon
 
         static async Task Main(string[] args)
         {
-            // Parse command-line arguments
             ParseArguments(args);
-
-            // Set Console Window Parameters (Optional)
-            ConfigureConsoleWindow();
-
-            Console.Title = "PolMon (mbnq.pl)";
+            ConsoleWindowCfg();
             Console.WriteLine("Init: started");
 
             // Initialize performance counters
@@ -60,6 +55,7 @@ namespace polmon
             }
 
             Console.WriteLine("Init: ok!");
+            Console.WriteLine($"Starting Configuration - IP: {svIP}, Port: {svPort}, Refresh Time: {svRefreshTime}ms");
             Console.WriteLine($"Server started, listening on {svIP}:{svPort}");
 
             while (true)
@@ -196,7 +192,6 @@ namespace polmon
             listener.Close();
         }
 
-        // Move helper methods outside of Main to avoid static local functions
         static void ParseArguments(string[] cmdArgs)
         {
             for (int i = 0; i < cmdArgs.Length; i++)
@@ -238,6 +233,10 @@ namespace polmon
                         break;
                     case "-help":
                     case "--help":
+                    case "?":
+                    case "/?":
+                    case "-?":
+                    case "--?":
                         DisplayHelp();
                         Environment.Exit(0);
                         break;
@@ -268,23 +267,17 @@ namespace polmon
             return System.Net.IPAddress.TryParse(ip, out _);
         }
 
-        static void ConfigureConsoleWindow()
+        static void ConsoleWindowCfg()
         {
             try
             {
-                // Set the window size (columns, rows)
                 Console.SetWindowSize(100, 40);
-
-                // Set the buffer size (columns, rows)
                 Console.SetBufferSize(100, 1000);
-
-                // Optionally, set the console colors
-                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.BackgroundColor = ConsoleColor.Black;
-                Console.Clear(); // Apply background color
-
-                // Hide the cursor for a cleaner display
+                Console.Clear();
                 Console.CursorVisible = false;
+                Console.Title = "PolMon (mbnq.pl)";
             }
             catch (ArgumentOutOfRangeException ex)
             {

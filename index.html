@@ -5,7 +5,7 @@
     <meta http-equiv="refresh" content="5">
     <title>Server Monitor</title>
     <style>
-        /* Your CSS Styles */
+        /* Your existing CSS styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #2b2b2b;
@@ -37,33 +37,23 @@
 
         .gauge {
             width: 250px;
-            height: 250px;
+            height: 300px; /* Adjusted height to accommodate the label */
             position: relative;
             margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-            .gauge canvas {
+            .gauge .gauge-container {
                 width: 100%;
-                height: 100%;
+                height: 250px; /* Adjusted to fit within the gauge container */
             }
 
-        .gauge-value {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            font-size: 28px;
-            font-weight: bold;
-        }
-
         .gauge-label {
-            position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
+            margin-top: 10px;
             font-size: 18px;
+            text-align: center;
         }
 
         .info {
@@ -112,29 +102,29 @@
             }
         }
     </style>
+    <!-- Include Raphael.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
+    <!-- Include JustGage -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.3.2/justgage.min.js"></script>
 </head>
 <body>
     <h1>Server Monitor</h1>
     <div class="container">
         <div class="gauges">
             <div class="gauge" id="cpuGauge">
-                <canvas id="cpuCanvas"></canvas>
-                <div class="gauge-value">{{cpuUsage}}%</div>
+                <div id="cpuGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">CPU Usage</div>
             </div>
             <div class="gauge" id="ramGauge">
-                <canvas id="ramCanvas"></canvas>
-                <div class="gauge-value">{{ramUsagePercent}}%</div>
+                <div id="ramGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">RAM Usage</div>
             </div>
             <div class="gauge" id="networkGauge">
-                <canvas id="networkCanvas"></canvas>
-                <div class="gauge-value">{{networkUsageFormatted}}/s</div>
+                <div id="networkGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">Network Usage</div>
             </div>
             <div class="gauge" id="pageFileGauge">
-                <canvas id="pageFileCanvas"></canvas>
-                <div class="gauge-value">{{pagingUsage}}%</div>
+                <div id="pageFileGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">Page File Usage</div>
             </div>
         </div>
@@ -147,55 +137,83 @@
         </div>
     </div>
     <script>
-        function drawGauge(canvasId, value, maxValue, color) {
-            var canvas = document.getElementById(canvasId);
-            var context = canvas.getContext('2d');
-            var centerX = canvas.width / 2;
-            var centerY = canvas.height / 2;
-            var radius = (canvas.width / 2) - 10;
-            var startAngle = 0.75 * Math.PI;
-            var endAngle = 2.25 * Math.PI;
-            var angle = startAngle + (value / maxValue) * (endAngle - startAngle);
-
-            // Clear the canvas
-            context.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Background circle
-            context.beginPath();
-            context.arc(centerX, centerY, radius, startAngle, endAngle, false);
-            context.lineWidth = 20;
-            context.strokeStyle = '#444';
-            context.stroke();
-
-            // Value arc
-            context.beginPath();
-            context.arc(centerX, centerY, radius, startAngle, angle, false);
-            context.lineWidth = 20;
-            context.strokeStyle = color;
-            context.stroke();
-        }
-
-        function getMaxNetworkSpeed() {
-            return 125000000; // Adjust this value based on your network speed in Bytes/sec
-        }
-
         // Parse placeholders as numbers
         var cpuUsageValue = parseFloat('{{cpuUsage}}');
         var ramUsagePercentValue = parseFloat('{{ramUsagePercent}}');
         var networkUsageNumericValue = parseFloat('{{networkUsageNumeric}}');
         var pagingUsageValue = parseFloat('{{pagingUsage}}');
 
-        // Debug: Log values to console
-        console.log('CPU Usage:', cpuUsageValue);
-        console.log('RAM Usage Percent:', ramUsagePercentValue);
-        console.log('Network Usage Numeric:', networkUsageNumericValue);
-        console.log('Paging Usage:', pagingUsageValue);
+        // Max network speed in Bytes per second
+        var maxNetworkSpeed = getMaxNetworkSpeed();
 
-        // Draw gauges using parsed values
-        drawGauge('cpuCanvas', cpuUsageValue, 100, '#FF6347'); // Tomato color
-        drawGauge('ramCanvas', ramUsagePercentValue, 100, '#4682B4'); // SteelBlue color
-        drawGauge('networkCanvas', networkUsageNumericValue, getMaxNetworkSpeed(), '#3CB371'); // MediumSeaGreen
-        drawGauge('pageFileCanvas', pagingUsageValue, 100, '#FFD700'); // Gold color
+        // Convert network usage to percentage of max speed
+        var networkUsagePercent = (networkUsageNumericValue / maxNetworkSpeed) * 100;
+        if (networkUsagePercent > 100) networkUsagePercent = 100; // Cap at 100%
+
+        // Initialize JustGage gauges
+        var cpuGauge = new JustGage({
+            id: "cpuGaugeContainer",
+            value: cpuUsageValue,
+            min: 0,
+            max: 100,
+            title: "",
+            label: "%",
+            gaugeColor: "#444",
+            levelColors: ["#FF6347"],
+            valueFontColor: "#f0f0f0",
+            titleFontColor: "#f0f0f0",
+            labelFontColor: "#f0f0f0",
+            gaugeWidthScale: 0.6
+        });
+
+        var ramGauge = new JustGage({
+            id: "ramGaugeContainer",
+            value: ramUsagePercentValue,
+            min: 0,
+            max: 100,
+            title: "",
+            label: "%",
+            gaugeColor: "#444",
+            levelColors: ["#4682B4"],
+            valueFontColor: "#f0f0f0",
+            titleFontColor: "#f0f0f0",
+            labelFontColor: "#f0f0f0",
+            gaugeWidthScale: 0.6
+        });
+
+        var networkGauge = new JustGage({
+            id: "networkGaugeContainer",
+            value: networkUsagePercent,
+            min: 0,
+            max: 100,
+            title: "",
+            label: "%",
+            gaugeColor: "#444",
+            levelColors: ["#3CB371"],
+            valueFontColor: "#f0f0f0",
+            titleFontColor: "#f0f0f0",
+            labelFontColor: "#f0f0f0",
+            gaugeWidthScale: 0.6
+        });
+
+        var pageFileGauge = new JustGage({
+            id: "pageFileGaugeContainer",
+            value: pagingUsageValue,
+            min: 0,
+            max: 100,
+            title: "",
+            label: "%",
+            gaugeColor: "#444",
+            levelColors: ["#FFD700"],
+            valueFontColor: "#f0f0f0",
+            titleFontColor: "#f0f0f0",
+            labelFontColor: "#f0f0f0",
+            gaugeWidthScale: 0.6
+        });
+
+        function getMaxNetworkSpeed() {
+            return 125000000; // Adjust this value based on your network speed in Bytes/sec
+        }
     </script>
 </body>
 </html>

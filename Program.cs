@@ -85,6 +85,7 @@ namespace polmon
                     ramUsed,
                     totalRam,
                     ramUsagePercent,
+                    networkUsage, // Pass networkUsage here
                     networkUsageFormatted,
                     diskReadFormatted,
                     diskWriteFormatted,

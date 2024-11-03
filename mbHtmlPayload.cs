@@ -11,6 +11,7 @@ namespace polmon
             float ramUsed,
             float totalRam,
             float ramUsagePercent,
+            float networkUsage, // Added this parameter
             string networkUsageFormatted,
             string diskReadFormatted,
             string diskWriteFormatted,
@@ -33,7 +34,7 @@ namespace polmon
             string ramUsagePercentStr = ramUsagePercent.ToString("N2", CultureInfo.InvariantCulture);
             string pagingUsageStr = pagingUsage.ToString("N2", CultureInfo.InvariantCulture);
             string uptimeStr = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s";
-            string networkUsageNumericStr = networkUsageFormatted.Replace(" ", "").Split(' ')[0];
+            string networkUsageNumericStr = networkUsage.ToString("N0", CultureInfo.InvariantCulture);
 
             // Replace placeholders with actual values
             html = html.Replace("{{cpuUsage}}", cpuUsageStr)

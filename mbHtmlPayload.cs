@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
 
 namespace polmon
 {
@@ -18,131 +19,35 @@ namespace polmon
             int processCount,
             int threadCount)
         {
-            string html = $@"
-            <html>
-                <head>
-                    <meta charset='UTF-8'>
-                    <meta http-equiv='refresh' content='5'>
-                    <title>Server Monitor</title>
-                    <style>
-                        body {{
-                            font-family: Arial, sans-serif;
-                            background-color: #f0f0f0;
-                            margin: 0;
-                            padding: 0;
-                        }}
-                        h1 {{
-                            color: #333;
-                            text-align: center;
-                            padding: 20px;
-                        }}
-                        .container {{
-                            width: 90%;
-                            margin: auto;
-                        }}
-                        .gauges {{
-                            display: flex;
-                            justify-content: space-around;
-                            flex-wrap: wrap;
-                        }}
-                        .gauge {{
-                            width: 200px;
-                            height: 200px;
-                            position: relative;
-                            margin: 20px;
-                        }}
-                        .gauge canvas {{
-                            width: 100%;
-                            height: 100%;
-                        }}
-                        .gauge-value {{
-                            position: absolute;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                            text-align: center;
-                            font-size: 24px;
-                            font-weight: bold;
-                        }}
-                        .info {{
-                            margin: 20px;
-                            background-color: #fff;
-                            padding: 20px;
-                            border-radius: 5px;
-                            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                        }}
-                        .info p {{
-                            font-size: 1.1em;
-                            margin: 10px 0;
-                        }}
-                    </style>
-                </head>
-                <body>
-                    <h1>Server Monitor</h1>
-                    <div class='container'>
-                        <div class='gauges'>
-                            <div class='gauge' id='cpuGauge'>
-                                <canvas id='cpuCanvas'></canvas>
-                                <div class='gauge-value'>{cpuUsage.ToString("N2", CultureInfo.InvariantCulture)}%</div>
-                            </div>
-                            <div class='gauge' id='ramGauge'>
-                                <canvas id='ramCanvas'></canvas>
-                                <div class='gauge-value'>{ramUsagePercent.ToString("N2", CultureInfo.InvariantCulture)}%</div>
-                            </div>
-                            <div class='gauge' id='networkGauge'>
-                                <canvas id='networkCanvas'></canvas>
-                                <div class='gauge-value'>{networkUsageFormatted}/s</div>
-                            </div>
-                        </div>
-                        <div class='info'>
-                            <p><strong>CPU Usage:</strong> {cpuUsage.ToString("N2", CultureInfo.InvariantCulture)}%</p>
-                            <p><strong>RAM Usage:</strong> {ramUsed.ToString("N0", CultureInfo.InvariantCulture)} MB / {totalRam.ToString("N0", CultureInfo.InvariantCulture)} MB ({ramUsagePercent.ToString("N2", CultureInfo.InvariantCulture)}%)</p>
-                            <p><strong>Network Usage:</strong> {networkUsageFormatted}/s</p>
-                            <p><strong>Disk Read:</strong> {diskReadFormatted}/s</p>
-                            <p><strong>Disk Write:</strong> {diskWriteFormatted}/s</p>
-                            <p><strong>Paging File Usage:</strong> {pagingUsage.ToString("N2", CultureInfo.InvariantCulture)}%</p>
-                            <p><strong>System Uptime:</strong> {uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s</p>
-                            <p><strong>Process Count:</strong> {processCount}</p>
-                            <p><strong>Thread Count:</strong> {threadCount}</p>
-                        </div>
-                    </div>
-                    <script>
-                        function drawGauge(canvasId, value, maxValue, color) {{
-                            var canvas = document.getElementById(canvasId);
-                            var context = canvas.getContext('2d');
-                            var centerX = canvas.width / 2;
-                            var centerY = canvas.height / 2;
-                            var radius = (canvas.width / 2) - 10;
-                            var startAngle = 0.75 * Math.PI;
-                            var endAngle = 2.25 * Math.PI;
-                            var angle = startAngle + (value / maxValue) * (endAngle - startAngle);
+            // Determine the path to index.html
+            string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string htmlFilePath = Path.Combine(exeDirectory, "index.html");
 
-                            // Background circle
-                            context.beginPath();
-                            context.arc(centerX, centerY, radius, startAngle, endAngle, false);
-                            context.lineWidth = 15;
-                            context.strokeStyle = '#eee';
-                            context.stroke();
+            // Read the HTML content from index.html
+            string html = File.ReadAllText(htmlFilePath);
 
-                            // Value arc
-                            context.beginPath();
-                            context.arc(centerX, centerY, radius, startAngle, angle, false);
-                            context.lineWidth = 15;
-                            context.strokeStyle = color;
-                            context.stroke();
-                        }}
+            // Format values using InvariantCulture
+            string cpuUsageStr = cpuUsage.ToString("N2", CultureInfo.InvariantCulture);
+            string ramUsedStr = ramUsed.ToString("N0", CultureInfo.InvariantCulture);
+            string totalRamStr = totalRam.ToString("N0", CultureInfo.InvariantCulture);
+            string ramUsagePercentStr = ramUsagePercent.ToString("N2", CultureInfo.InvariantCulture);
+            string pagingUsageStr = pagingUsage.ToString("N2", CultureInfo.InvariantCulture);
+            string uptimeStr = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s";
+            string networkUsageNumericStr = networkUsageFormatted.Replace(" ", "").Split(' ')[0];
 
-                        // Draw gauges
-                        drawGauge('cpuCanvas', {cpuUsage.ToString("N2", CultureInfo.InvariantCulture)}, 100, '#FF6347');
-                        drawGauge('ramCanvas', {ramUsagePercent.ToString("N2", CultureInfo.InvariantCulture)}, 100, '#4682B4');
-                        drawGauge('networkCanvas', {{networkUsageFormattedNumeric}}, GetMaxNetworkSpeed(), '#3CB371');
-
-                        function GetMaxNetworkSpeed() {{
-                            return 100000000; // Adjust this value based on your network interface speed
-                        }}
-                    </script>
-                </body>
-            </html>";
+            // Replace placeholders with actual values
+            html = html.Replace("{{cpuUsage}}", cpuUsageStr)
+                       .Replace("{{ramUsed}}", ramUsedStr)
+                       .Replace("{{totalRam}}", totalRamStr)
+                       .Replace("{{ramUsagePercent}}", ramUsagePercentStr)
+                       .Replace("{{networkUsageFormatted}}", networkUsageFormatted)
+                       .Replace("{{diskReadFormatted}}", diskReadFormatted)
+                       .Replace("{{diskWriteFormatted}}", diskWriteFormatted)
+                       .Replace("{{pagingUsage}}", pagingUsageStr)
+                       .Replace("{{uptime}}", uptimeStr)
+                       .Replace("{{processCount}}", processCount.ToString())
+                       .Replace("{{threadCount}}", threadCount.ToString())
+                       .Replace("{{networkUsageNumeric}}", networkUsageNumericStr);
 
             return html;
         }

@@ -1,0 +1,188 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="5">
+    <title>Server Monitor</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2b2b2b;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            background-color: #1a1a1a;
+            border-bottom: 1px solid #444;
+        }
+
+        .container {
+            width: 90%;
+            margin: 20px auto;
+            max-width: 1200px;
+        }
+
+        .gauges {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .gauge {
+            width: 250px;
+            height: 250px;
+            position: relative;
+            margin: 20px;
+        }
+
+            .gauge canvas {
+                width: 100%;
+                height: 100%;
+            }
+
+        .gauge-value {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .gauge-label {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 18px;
+        }
+
+        .info {
+            margin: 20px auto;
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 800px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+            .info p {
+                font-size: 1.1em;
+                margin: 10px 0;
+                line-height: 1.5;
+            }
+
+                .info p strong {
+                    color: #ffa500;
+                }
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+        }
+
+            ::-webkit-scrollbar-thumb:hover {
+                background: #555;
+            }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .gauges {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .gauge {
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Server Monitor</h1>
+    <div class="container">
+        <div class="gauges">
+            <div class="gauge" id="cpuGauge">
+                <canvas id="cpuCanvas"></canvas>
+                <div class="gauge-value">{{cpuUsage}}%</div>
+                <div class="gauge-label">CPU Usage</div>
+            </div>
+            <div class="gauge" id="ramGauge">
+                <canvas id="ramCanvas"></canvas>
+                <div class="gauge-value">{{ramUsagePercent}}%</div>
+                <div class="gauge-label">RAM Usage</div>
+            </div>
+            <div class="gauge" id="networkGauge">
+                <canvas id="networkCanvas"></canvas>
+                <div class="gauge-value">{{networkUsageFormatted}}/s</div>
+                <div class="gauge-label">Network Usage</div>
+            </div>
+            <div class="gauge" id="pageFileGauge">
+                <canvas id="pageFileCanvas"></canvas>
+                <div class="gauge-value">{{pagingUsage}}%</div>
+                <div class="gauge-label">Page File Usage</div>
+            </div>
+        </div>
+        <div class="info">
+            <p><strong>Disk Read:</strong> {{diskReadFormatted}}/s</p>
+            <p><strong>Disk Write:</strong> {{diskWriteFormatted}}/s</p>
+            <p><strong>System Uptime:</strong> {{uptime}}</p>
+            <p><strong>Process Count:</strong> {{processCount}}</p>
+            <p><strong>Thread Count:</strong> {{threadCount}}</p>
+        </div>
+    </div>
+    <script>
+        function drawGauge(canvasId, value, maxValue, color) {
+            var canvas = document.getElementById(canvasId);
+            var context = canvas.getContext('2d');
+            var centerX = canvas.width / 2;
+            var centerY = canvas.height / 2;
+            var radius = (canvas.width / 2) - 10;
+            var startAngle = 0.75 * Math.PI;
+            var endAngle = 2.25 * Math.PI;
+            var angle = startAngle + (value / maxValue) * (endAngle - startAngle);
+
+            // Clear the canvas
+            context.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Background circle
+            context.beginPath();
+            context.arc(centerX, centerY, radius, startAngle, endAngle, false);
+            context.lineWidth = 20;
+            context.strokeStyle = '#444';
+            context.stroke();
+
+            // Value arc
+            context.beginPath();
+            context.arc(centerX, centerY, radius, startAngle, angle, false);
+            context.lineWidth = 20;
+            context.strokeStyle = color;
+            context.stroke();
+        }
+
+        // Draw gauges
+        drawGauge('cpuCanvas', {{cpuUsage}}, 100, '#FF6347'); // Tomato color
+        drawGauge('ramCanvas', {{ramUsagePercent}}, 100, '#4682B4'); // SteelBlue color
+        drawGauge('networkCanvas', {{networkUsageNumeric}}, getMaxNetworkSpeed(), '#3CB371'); // MediumSeaGreen
+        drawGauge('pageFileCanvas', {{pagingUsage}}, 100, '#FFD700'); // Gold color
+
+        function getMaxNetworkSpeed() {
+            return 125000000; // Adjust this value based on your network speed in Bytes/sec (e.g., 1 Gbps = 125,000,000 Bytes/sec)
+        }
+    </script>
+</body>
+</html>

@@ -16,7 +16,6 @@ namespace polmon
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";
         public static int svRefreshTime = 500; // in milliseconds
-
         static async Task Main(string[] args)
         {
             ParseArguments(args);
@@ -190,7 +189,6 @@ namespace polmon
             // Shutdown procedures
             listener.Close();
         }
-
         static void ParseArguments(string[] cmdArgs)
         {
             for (int i = 0; i < cmdArgs.Length; i++)
@@ -247,7 +245,6 @@ namespace polmon
 
             Console.WriteLine($"Configuration - IP: {svIP}, Port: {svPort}, Refresh Time: {svRefreshTime}ms");
         }
-
         static void DisplayHelp()
         {
             Console.WriteLine("PolMon (mbnq.pl) - Server Monitor");

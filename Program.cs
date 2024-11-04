@@ -29,6 +29,7 @@ namespace polmon
             var diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
             var diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
             var uptimeCounter = new PerformanceCounter("System", "System Up Time");
+
             uptimeCounter.NextValue(); // Initialize uptime counter
 
             // Initialize network counters for all instances

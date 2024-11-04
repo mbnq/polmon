@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
 using System.Management;
-using System.Linq; // For LINQ methods
-using Newtonsoft.Json; // Using Newtonsoft.Json for JSON serialization
-using System.IO; // For IOException
+using System.Linq;
+using Newtonsoft.Json;
+using System.IO;
 
 namespace polmon
 {
@@ -16,10 +16,11 @@ namespace polmon
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";
         public static int svRefreshTime = 500; // in milliseconds
+
         static async Task Main(string[] args)
         {
-            ParseArguments(args);
-            ConsoleWindowCfg();
+            MbConsole.ParseArguments(args);
+            MbConsole.ConfigureConsoleWindow();
             Console.WriteLine("Init: started");
 
             // Initialize performance counters
@@ -188,101 +189,6 @@ namespace polmon
 
             // Shutdown procedures
             listener.Close();
-        }
-        static void ParseArguments(string[] cmdArgs)
-        {
-            for (int i = 0; i < cmdArgs.Length; i++)
-            {
-                switch (cmdArgs[i].ToLower())
-                {
-                    case "-port":
-                        if (i + 1 < cmdArgs.Length && int.TryParse(cmdArgs[i + 1], out int port))
-                        {
-                            svPort = port;
-                            i++; // Skip next argument as it's the value
-                        }
-                        else
-                        {
-                            Console.WriteLine("Invalid or missing value for -port. Using default port 8080.");
-                        }
-                        break;
-                    case "-ip":
-                        if (i + 1 < cmdArgs.Length && IsValidIPAddress(cmdArgs[i + 1]))
-                        {
-                            svIP = cmdArgs[i + 1];
-                            i++;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Invalid or missing value for -ip. Using default IP 127.0.0.1.");
-                        }
-                        break;
-                    case "-rtime":
-                        if (i + 1 < cmdArgs.Length && int.TryParse(cmdArgs[i + 1], out int rtime))
-                        {
-                            svRefreshTime = rtime;
-                            i++;
-                        }
-                        else
-                        {
-                            Console.WriteLine("Invalid or missing value for -rtime. Using default refresh time 500ms.");
-                        }
-                        break;
-                    case "-help":
-                    case "--help":
-                    case "?":
-                    case "/?":
-                    case "-?":
-                    case "--?":
-                        DisplayHelp();
-                        Environment.Exit(0);
-                        break;
-                    default:
-                        Console.WriteLine($"Unknown argument: {cmdArgs[i]}");
-                        break;
-                }
-            }
-
-            Console.WriteLine($"Configuration - IP: {svIP}, Port: {svPort}, Refresh Time: {svRefreshTime}ms");
-        }
-        static void DisplayHelp()
-        {
-            Console.WriteLine("PolMon (mbnq.pl) - Server Monitor");
-            Console.WriteLine("Usage:");
-            Console.WriteLine("  polmon.exe [options]");
-            Console.WriteLine();
-            Console.WriteLine("Options:");
-            Console.WriteLine("  -port <number>    Set the listening port (default: 8080)");
-            Console.WriteLine("  -ip <address>     Set the IP address to listen on (default: 127.0.0.1)");
-            Console.WriteLine("  -rtime <number>   Set the refresh time in milliseconds (default: 500)");
-            Console.WriteLine("  -help, --help     Display this help message");
-        }
-
-        static bool IsValidIPAddress(string ip)
-        {
-            return System.Net.IPAddress.TryParse(ip, out _);
-        }
-
-        static void ConsoleWindowCfg()
-        {
-            try
-            {
-                Console.SetWindowSize(100, 40);
-                Console.SetBufferSize(100, 1000);
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.BackgroundColor = ConsoleColor.Black;
-                Console.Clear();
-                Console.CursorVisible = false;
-                Console.Title = "PolMon (mbnq.pl)";
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                Console.WriteLine($"Error configuring console window: {ex.Message}");
-            }
-            catch (IOException ex)
-            {
-                Console.WriteLine($"IO Error configuring console window: {ex.Message}");
-            }
         }
 
         // Helper method to get total physical memory in MB

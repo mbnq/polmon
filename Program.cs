@@ -27,15 +27,17 @@ namespace PolMon
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";
         public static int svRefreshTime = 500; // in milliseconds
-        public static string svMachineName = Environment.MachineName;
+        public static string svMachineName = "n/a";
         public static float svTestVar2 = 0.00f;
         public static float svCPUTemp = 0.00f;
+        public static float svGPUTemp = 0.00f;
 
 
         public static Computer computer = new Computer
         {
             CPUEnabled = true,
-            MainboardEnabled = true
+            MainboardEnabled = true,
+            GPUEnabled = true
         };
 
         static async Task Main(string[] args)
@@ -164,9 +166,10 @@ namespace PolMon
                 uptime = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s",
                 processCount = processCount,
                 threadCount = threadCount,
-                svMachineName = svMachineName,
+                svMachineName = Environment.MachineName,
                 svCPUTemp = GetCPUTemperature(),
-                svTestVar2 = GetCPUTemperature()
+                svGPUTemp = GetGPUTemperature(),
+                svTestVar2 = GetGPUTemperature()
             };
 
         }
@@ -276,6 +279,41 @@ namespace PolMon
 
             return temperatures.Count > 0 ? temperatures.Average() : 0;
         }
+        static float GetGPUTemperature()
+        {
+            var temperatures = new List<float>();
+
+            foreach (var hardwareItem in computer.Hardware)
+            {
+                if ( (hardwareItem.HardwareType == HardwareType.GpuNvidia) || (hardwareItem.HardwareType == HardwareType.GpuAti) )
+                {
+                    hardwareItem.Update();
+
+                    foreach (var sensor in hardwareItem.Sensors)
+                    {
+                        if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
+                        {
+                            temperatures.Add(sensor.Value.Value);
+                        }
+                    }
+                    // Traverse sub-hardware
+                    foreach (var subHardware in hardwareItem.SubHardware)
+                    {
+                        subHardware.Update();
+
+                        foreach (var sensor in subHardware.Sensors)
+                        {
+                            if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
+                            {
+                                temperatures.Add(sensor.Value.Value);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return temperatures.Count > 0 ? temperatures.Average() : 0;
+        }
 
     }
 
@@ -296,6 +334,7 @@ namespace PolMon
         public string svMachineName { get; set; }
         public float svTestVar2 { get; set; }
         public float svCPUTemp { get; set; }
+        public float svGPUTemp { get; set; }
     }
 
 }

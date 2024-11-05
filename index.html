@@ -115,7 +115,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.3.2/justgage.min.js"></script>
 </head>
 <body>
-    <h1>PolMon 🖥️ -  <span id="machineNameHeader"></span></h1>
+    <h1>PolMon 🖥️ - <span id="svMachineNameStr"></span></h1>
     <div class="container">
         <div class="gauges">
             <div class="gauge" id="cpuGauge">
@@ -137,6 +137,10 @@
             <div class="gauge" id="cpuTempGauge">
                 <div id="cpuTempGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">CPU Temperature</div>
+            </div>            
+            <div class="gauge" id="gpuTempGauge">
+                <div id="gpuTempGaugeContainer" class="gauge-container"></div>
+                <div class="gauge-label">GPU Temperature</div>
             </div>
         </div>
         <div class="info">
@@ -145,8 +149,6 @@
             <p><strong>System Uptime:</strong> <span id="uptime"></span></p>
             <p><strong>Process Count:</strong> <span id="processCount"></span></p>
             <p><strong>Thread Count:</strong> <span id="threadCount"></span></p>
-            <p><strong>Machine Name:</strong> <span id="svMachineNameStr"></span></p>
-            <p><strong>CPU Temp:</strong> <span id="svCPUTempStr"></span>°C</p>
             <p><strong>svTestVar2:</strong> <span id="svTestVar2Str"></span></p>
         </div>
     </div>
@@ -233,6 +235,21 @@
             counter: true
         });
 
+        var gpuTempGauge = new JustGage({
+            id: "gpuTempGaugeContainer",
+            value: 0,
+            min: 0,
+            max: 100,
+            title: "",
+            label: "°C",
+            gaugeColor: "#444",
+            levelColors: ["#FFD700"],
+            valueFontColor: "#f0f0f0",
+            gaugeWidthScale: 0.6,
+            noGradient: true,
+            counter: true
+        });
+
         // Fetch data from the server and update the gauges
         async function fetchData() {
             try {
@@ -246,6 +263,7 @@
                 networkGauge.refresh(networkUsagePercent);
                 pageFileGauge.refresh(data.pagingUsage);
                 cpuTempGauge.refresh(Number(data.svCPUTemp));
+                gpuTempGauge.refresh(Number(data.svGPUTemp));
 
                 document.getElementById('diskRead').innerText = data.diskReadFormatted;
                 document.getElementById('diskWrite').innerText = data.diskWriteFormatted;
@@ -254,9 +272,8 @@
                 document.getElementById('threadCount').innerText = data.threadCount;
                 document.getElementById('svMachineNameStr').innerText = data.svMachineName;
                 document.getElementById('svCPUTempStr').innerText = data.svCPUTemp;
+                document.getElementById('svGPUTempStr').innerText = data.svGPUTemp;
                 document.getElementById('svTestVar2Str').innerText = data.svTestVar2;
-
-                document.getElementById('machineNameHeader').innerText = data.svMachineName;
             } catch (error) {
                 console.error('Error fetching data:', error);
             }

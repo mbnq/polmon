@@ -7,6 +7,8 @@
 
     Notes: RUN AS ADMINISTRATOR!
 
+rework disk read write sum of all drives
+
 */
 
 using System;

@@ -40,7 +40,14 @@ namespace PolMon
         }
         static string FormatBytes(float bytes)
         {
-            return HtmlBuilder.FormatBytes(bytes);
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            int order = 0;
+            while (bytes >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                bytes /= 1024;
+            }
+            return $"{bytes:0.##} {sizes[order]}";
         }
         static float GetPagingFileUsagePercent()
         {

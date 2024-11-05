@@ -86,7 +86,6 @@ namespace PolMon
             computer.Open();
 
             // Initialize performance counters
-            var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
             var ramCounter = new PerformanceCounter("Memory", "Available MBytes");
             var diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
             var diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
@@ -133,7 +132,6 @@ namespace PolMon
                 var request = context.Request;
 
                 // Initialize counters
-                cpuCounter.NextValue();
                 diskReadCounter.NextValue();
                 diskWriteCounter.NextValue();
                 ramCounter.NextValue();
@@ -147,7 +145,6 @@ namespace PolMon
 
                 // Gather data
                 var data = GatherPerformanceData(
-                    cpuCounter,
                     ramCounter,
                     diskReadCounter,
                     diskWriteCounter,
@@ -175,14 +172,12 @@ namespace PolMon
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
         static PerformanceData GatherPerformanceData(
-            PerformanceCounter cpuCounter,
             PerformanceCounter ramCounter,
             PerformanceCounter diskReadCounter,
             PerformanceCounter diskWriteCounter,
             PerformanceCounter uptimeCounter,
             PerformanceCounter[] networkCounters)
         {
-            var cpuUsage = cpuCounter.NextValue();
             var ramAvailable = ramCounter.NextValue();
             var networkUsage = networkCounters.Sum(counter => counter.NextValue());
             var diskRead = diskReadCounter.NextValue();

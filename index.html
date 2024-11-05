@@ -150,6 +150,10 @@
                 <div id="gpuTempGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">GPU Temperature</div>
             </div>
+            <div class="gauge" id="fanSpeedsGauge">
+                <div id="fanSpeedsGaugeContainer" class="gauge-container"></div>
+                <div class="gauge-label">Mainboard Fans Speed</div>
+            </div>
         </div>
         <div class="info">
             <p><strong>Disk Read:</strong> <span id="diskRead"></span>/s</p>
@@ -274,6 +278,21 @@
             counter: true
         });
 
+        var fanSpeedsGauge = new JustGage({
+            id: "fanSpeedsGaugeContainer",
+            value: 0,
+            min: 0,
+            max: 3000,
+            title: "",
+            label: "RPM",
+            gaugeColor: "#444",
+            levelColors: ["#FFD700"],
+            valueFontColor: "#f0f0f0",
+            gaugeWidthScale: 0.6,
+            noGradient: true,
+            counter: true
+        });
+
         // Fetch data from the server and update the gauges
         async function fetchData() {
             try {
@@ -289,6 +308,7 @@
                 cpuTempGauge.refresh(Number(data.svCPUTemp));
                 gpuTempGauge.refresh(Number(data.svGPUTemp));
                 gpuLoadGauge.refresh(Number(data.svGPULoad));
+                fanSpeedsGauge.refresh(Number(data.svFANAvgSpeed));
 
                 document.getElementById('diskRead').innerText = data.diskReadFormatted;
                 document.getElementById('diskWrite').innerText = data.diskWriteFormatted;

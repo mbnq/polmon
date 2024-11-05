@@ -39,6 +39,7 @@ namespace PolMon
             string svCPUTempStr = data.svCPUTemp.ToString();
             string svGPUTempStr = data.svGPUTemp.ToString();
             string svGPULoadStr = data.svGPULoad.ToString();
+            string svFANAvgSpeedStr = data.svFANAvgSpeed.ToString();
             string svTestVar2Str = data.svTestVar2.ToString();
 
             // Replace placeholders with actual values
@@ -58,6 +59,7 @@ namespace PolMon
                        .Replace("{{svCPUTempStr}}", svCPUTempStr)
                        .Replace("{{svGPUTempStr}}", svGPUTempStr)
                        .Replace("{{svGPULoadStr}}", svGPULoadStr)
+                       .Replace("{{svFANAvgSpeedStr}}", svFANAvgSpeedStr)
                        .Replace("{{svTestVar2Str}}", svTestVar2Str);
 
             return html;

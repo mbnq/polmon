@@ -5,6 +5,8 @@
     https://mbnq.pl/
     mbnq00 on gmail
 
+    Notes: RUN AS ADMINISTRATOR!
+
 */
 
 using System;
@@ -38,12 +40,16 @@ namespace PolMon
         public static float svCPUTemp = 0.00f;
         public static float svGPUTemp = 0.00f;
         public static float svGPULoad = 0.00f;
+        public static float svFANSpeeds = 0.00f;
 
         public static Computer computer = new Computer
         {
             CPUEnabled = true,
             MainboardEnabled = true,
-            GPUEnabled = true
+            GPUEnabled = true,
+            HDDEnabled = true,
+            RAMEnabled = true,
+            FanControllerEnabled = true,
         };
         static async Task Main(string[] args)
         {
@@ -205,7 +211,8 @@ namespace PolMon
                 svCPUTemp = GetCPUTemperature(),
                 svGPUTemp = GetGPUTemperature(),
                 svGPULoad = GetGPULoad(),
-                svTestVar2 = GetGPULoad(),
+                svFANAvgSpeed = GetFansAvgSpeed(),
+                svTestVar2 = GetFansAvgSpeed(),
             };
 
         }
@@ -231,8 +238,6 @@ namespace PolMon
             }
             response.Close();
         }
-
-
         static async Task ServeHtmlResponse(HttpListenerResponse response)
         {
             string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -399,6 +404,41 @@ namespace PolMon
             return loads.Count > 0 ? loads.Average() : 0;
         }
 
+        static float GetFansAvgSpeed()
+        {
+            var fans = new List<float>();
+
+            foreach (var hardwareItem in computer.Hardware)
+            {
+                if (hardwareItem.HardwareType == HardwareType.Mainboard)
+                {
+                    hardwareItem.Update();
+
+                    foreach (var sensor in hardwareItem.Sensors)
+                    {
+                        if (sensor.SensorType == SensorType.Fan && sensor.Value.HasValue)
+                        {
+                            fans.Add(sensor.Value.Value);
+                        }
+                    }
+
+                    foreach (var subHardware in hardwareItem.SubHardware)
+                    {
+                        subHardware.Update();
+
+                        foreach (var sensor in subHardware.Sensors)
+                        {
+                            if (sensor.SensorType == SensorType.Fan && sensor.Value.HasValue)
+                            {
+                                fans.Add(sensor.Value.Value);
+                            }
+                        }
+                    }
+                }
+            }
+            return fans.Count > 0 ? fans.Average() : 0;
+        }
+
 
     }
 
@@ -421,6 +461,7 @@ namespace PolMon
         public float svCPUTemp { get; set; }
         public float svGPUTemp { get; set; }
         public float svGPULoad { get; set; }
+        public float svFANAvgSpeed { get; set; }
     }
 
 }

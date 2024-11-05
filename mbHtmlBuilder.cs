@@ -11,25 +11,11 @@ using System;
 using System.Globalization;
 using System.IO;
 
-namespace polmon
+namespace PolMon
 {
-    public static class HtmlTemplate
+    public static class HtmlBuilder
     {
-        public static string GetHtml(
-            float cpuUsage,
-            float ramUsed,
-            float totalRam,
-            float ramUsagePercent,
-            float networkUsage, // Ensure this parameter is present
-            string networkUsageFormatted,
-            string diskReadFormatted,
-            string diskWriteFormatted,
-            float pagingUsage,
-            TimeSpan uptimeSpan,
-            int processCount,
-            int threadCount,
-            string svTestVar
-         )
+        public static string BuildHtmlContent(PerformanceData data)
         {
             // Determine the path to index.html
             string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
@@ -39,16 +25,18 @@ namespace polmon
             string html = File.ReadAllText(htmlFilePath);
 
             // Format values
-            string cpuUsageStr = cpuUsage.ToString("F2", CultureInfo.InvariantCulture);
-            string ramUsedStr = ramUsed.ToString("F0", CultureInfo.InvariantCulture);
-            string totalRamStr = totalRam.ToString("F0", CultureInfo.InvariantCulture);
-            string ramUsagePercentStr = ramUsagePercent.ToString("F2", CultureInfo.InvariantCulture);
-            string pagingUsageStr = pagingUsage.ToString("F2", CultureInfo.InvariantCulture);
-            string uptimeStr = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s";
-            string networkUsageNumericStr = networkUsage.ToString("F2", CultureInfo.InvariantCulture);
-            string processCountStr = processCount.ToString(CultureInfo.InvariantCulture);
-            string threadCountStr = threadCount.ToString(CultureInfo.InvariantCulture);
-            string svTestVarStr = svTestVar;
+            string cpuUsageStr = data.cpuUsage.ToString("F2", CultureInfo.InvariantCulture);
+            string ramUsedStr = data.ramUsed.ToString("F0", CultureInfo.InvariantCulture);
+            string totalRamStr = data.totalRam.ToString("F0", CultureInfo.InvariantCulture);
+            string ramUsagePercentStr = data.ramUsagePercent.ToString("F2", CultureInfo.InvariantCulture);
+            string pagingUsageStr = data.pagingUsage.ToString("F2", CultureInfo.InvariantCulture);
+            string uptimeStr = data.uptime;
+            string networkUsageNumericStr = data.networkUsage.ToString("F2", CultureInfo.InvariantCulture);
+            string networkUsageFormatted = FormatBytes(data.networkUsage);
+            string processCountStr = data.processCount.ToString(CultureInfo.InvariantCulture);
+            string threadCountStr = data.threadCount.ToString(CultureInfo.InvariantCulture);
+            string svTestVarStr = data.svTestVar;
+            string svTestVar2Str = data.svTestVar;
 
             // Replace placeholders with actual values
             html = html.Replace("{{cpuUsage}}", cpuUsageStr)
@@ -56,17 +44,29 @@ namespace polmon
                        .Replace("{{totalRam}}", totalRamStr)
                        .Replace("{{ramUsagePercent}}", ramUsagePercentStr)
                        .Replace("{{networkUsageFormatted}}", networkUsageFormatted)
-                       .Replace("{{diskReadFormatted}}", diskReadFormatted)
-                       .Replace("{{diskWriteFormatted}}", diskWriteFormatted)
+                       .Replace("{{diskReadFormatted}}", data.diskReadFormatted)
+                       .Replace("{{diskWriteFormatted}}", data.diskWriteFormatted)
                        .Replace("{{pagingUsage}}", pagingUsageStr)
                        .Replace("{{uptime}}", uptimeStr)
                        .Replace("{{processCount}}", processCountStr)
                        .Replace("{{threadCount}}", threadCountStr)
                        .Replace("{{networkUsageNumeric}}", networkUsageNumericStr)
                        .Replace("{{svTestVarStr}}", svTestVarStr)
-                       ;
+                       .Replace("{{svTestVar2Str}}", svTestVar2Str);
 
             return html;
+        }
+
+        public static string FormatBytes(float bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            int order = 0;
+            while (bytes >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                bytes /= 1024;
+            }
+            return $"{bytes:0.##} {sizes[order]}";
         }
     }
 }

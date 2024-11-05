@@ -169,7 +169,7 @@ namespace PolMon
                 svMachineName = Environment.MachineName,
                 svCPUTemp = GetCPUTemperature(),
                 svGPUTemp = GetGPUTemperature(),
-                svTestVar2 = GetGPUTemperature()
+                svTestVar2 = 1.00f
             };
 
         }
@@ -314,6 +314,51 @@ namespace PolMon
 
             return temperatures.Count > 0 ? temperatures.Average() : 0;
         }
+
+        static float GetGPULoad()
+        {
+            var loads = new List<float>();
+
+            foreach (var hardwareItem in computer.Hardware)
+            {
+                if (hardwareItem.HardwareType == HardwareType.GpuNvidia || hardwareItem.HardwareType == HardwareType.GpuAti)
+                {
+                    hardwareItem.Update();
+
+                    foreach (var sensor in hardwareItem.Sensors)
+                    {
+                        if (sensor.SensorType == SensorType.Load && sensor.Value.HasValue)
+                        {
+                            if (sensor.Name.Equals("GPU Core", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                loads.Add(sensor.Value.Value);
+                            }
+                        }
+                    }
+
+                    foreach (var subHardware in hardwareItem.SubHardware)
+                    {
+                        subHardware.Update();
+
+                        foreach (var sensor in subHardware.Sensors)
+                        {
+                            if (sensor.SensorType == SensorType.Load && sensor.Value.HasValue)
+                            {
+                                if (sensor.Name.Equals("GPU Core", StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    loads.Add(sensor.Value.Value);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (loads.Count <= 0) return 0;
+            // Calculate and return the average GPU load
+            return loads.Count > 0 ? loads.Average() : 0;
+        }
+
 
     }
 

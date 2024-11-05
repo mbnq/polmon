@@ -32,6 +32,7 @@ namespace PolMon
         public static float svTestVar2 = 0.00f;
         public static float svCPUTemp = 0.00f;
         public static float svGPUTemp = 0.00f;
+        public static float svGPULoad = 0.00f;
 
 
         public static Computer computer = new Computer
@@ -170,7 +171,8 @@ namespace PolMon
                 svMachineName = Environment.MachineName,
                 svCPUTemp = GetCPUTemperature(),
                 svGPUTemp = GetGPUTemperature(),
-                svTestVar2 = 1.00f,
+                svGPULoad = GetGPULoad(),
+                svTestVar2 = GetGPULoad(),
             };
 
         }
@@ -385,6 +387,7 @@ namespace PolMon
         public float svTestVar2 { get; set; }
         public float svCPUTemp { get; set; }
         public float svGPUTemp { get; set; }
+        public float svGPULoad { get; set; }
     }
 
 }

@@ -61,6 +61,10 @@
             text-align: center;
         }
 
+        .gauge-hidden {
+            display: none;
+        }
+
         .info {
             margin: 20px auto;
             background-color: #1a1a1a;
@@ -122,6 +126,10 @@
                 <div id="cpuGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">CPU Usage</div>
             </div>
+            <div class="gauge" id="gpuLoadGauge">
+                <div id="gpuLoadGaugeContainer" class="gauge-container"></div>
+                <div class="gauge-label">GPU Usage</div>
+            </div>
             <div class="gauge" id="ramGauge">
                 <div id="ramGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">RAM Usage</div>
@@ -130,7 +138,7 @@
                 <div id="networkGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">Network Usage</div>
             </div>
-            <div class="gauge" id="pageFileGauge">
+            <div class="gauge-hidden" id="pageFileGauge">
                 <div id="pageFileGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">Page File Usage</div>
             </div>
@@ -152,6 +160,7 @@
             <p><strong>svTestVar2:</strong> <span id="svTestVar2Str"></span></p>
         </div>
     </div>
+
     <script>
         function getMaxNetworkSpeed() {
             return 125000000; // Adjust based on your network speed in Bytes/sec
@@ -250,6 +259,21 @@
             counter: true
         });
 
+        var gpuLoadGauge = new JustGage({
+            id: "gpuLoadGaugeContainer",
+            value: 0,
+            min: 0,
+            max: 100,
+            title: "",
+            label: "%",
+            gaugeColor: "#444",
+            levelColors: ["#FFD700"],
+            valueFontColor: "#f0f0f0",
+            gaugeWidthScale: 0.6,
+            noGradient: true,
+            counter: true
+        });
+
         // Fetch data from the server and update the gauges
         async function fetchData() {
             try {
@@ -264,6 +288,7 @@
                 pageFileGauge.refresh(data.pagingUsage);
                 cpuTempGauge.refresh(Number(data.svCPUTemp));
                 gpuTempGauge.refresh(Number(data.svGPUTemp));
+                gpuLoadGauge.refresh(Number(data.svGPULoad));
 
                 document.getElementById('diskRead').innerText = data.diskReadFormatted;
                 document.getElementById('diskWrite').innerText = data.diskWriteFormatted;

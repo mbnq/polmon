@@ -151,7 +151,7 @@ namespace PolMon
                 uptime = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s",
                 processCount = processCount,
                 threadCount = threadCount,
-                svTestVar = Environment.MachineName,
+                svMachineName = Environment.MachineName,
                 svTestVar2 = svTestVar2
             };
 
@@ -240,7 +240,7 @@ namespace PolMon
         public string uptime { get; set; }
         public int processCount { get; set; }
         public int threadCount { get; set; }
-        public string svTestVar { get; set; }
+        public string svMachineName { get; set; }
         public string svTestVar2 { get; set; }
     }
 

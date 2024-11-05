@@ -35,8 +35,8 @@ namespace PolMon
             string networkUsageFormatted = FormatBytes(data.networkUsage);
             string processCountStr = data.processCount.ToString(CultureInfo.InvariantCulture);
             string threadCountStr = data.threadCount.ToString(CultureInfo.InvariantCulture);
-            string svTestVarStr = data.svTestVar;
-            string svTestVar2Str = data.svTestVar;
+            string svTestVarStr = data.svMachineName;
+            string svTestVar2Str = data.svTestVar2;
 
             // Replace placeholders with actual values
             html = html.Replace("{{cpuUsage}}", cpuUsageStr)

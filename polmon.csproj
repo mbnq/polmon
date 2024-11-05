@@ -96,14 +96,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="mbConsole.cs" />
-    <Compile Include="mbHtmlBuilder.cs" />
+    <Compile Include="core\mbConsole.cs" />
+    <Compile Include="core\mbHtmlBuilder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <AdditionalFiles Include="mbBackground.webp">
+    <AdditionalFiles Include="html\mbBackground.webp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
     <None Include="packages.config" />
@@ -121,7 +121,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <AdditionalFiles Include="index.html">
+    <AdditionalFiles Include="html\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </AdditionalFiles>
   </ItemGroup>

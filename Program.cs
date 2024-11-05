@@ -42,6 +42,7 @@ namespace PolMon
         public static float svGPULoad = 0.00f;
         public static float svFANSpeeds = 0.00f;
         public static float svCPULoad = 0.00f;
+        public static float svGPUFanSpeed = 0.00f;
 
         public static Computer computer = new Computer
         {
@@ -208,6 +209,7 @@ namespace PolMon
                 svGPUTemp = GetGPUTemperature(),
                 svGPULoad = GetGPULoad(),
                 svFANAvgSpeed = GetFansAvgSpeed(),
+                svGPUFanSpeed = GetGPUFanSpeed(),
                 svTestVar2 = GetGPUFanSpeed(),
             };
 

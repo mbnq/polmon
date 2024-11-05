@@ -30,7 +30,7 @@ using System.Threading;
 
 namespace PolMon
 {
-    class Program
+    partial class Program
     {
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";
@@ -41,6 +41,7 @@ namespace PolMon
         public static float svGPUTemp = 0.00f;
         public static float svGPULoad = 0.00f;
         public static float svFANSpeeds = 0.00f;
+        public static float svCPULoad = 0.00f;
 
         public static Computer computer = new Computer
         {
@@ -54,7 +55,7 @@ namespace PolMon
         static async Task Main(string[] args)
         {
 
-            #if !DEBUG
+#if !DEBUG
             if (!IsAdministrator())
             {
                 try
@@ -76,7 +77,7 @@ namespace PolMon
                 Environment.Exit(0);
                 return;
             }
-            #endif
+#endif
 
             MbConsole.ParseArguments(args);
             MbConsole.ConfigureConsole();
@@ -196,7 +197,7 @@ namespace PolMon
 
             return new PerformanceData
             {
-                cpuUsage = cpuUsage,
+                cpuUsage = GetCPULoad(),
                 ramUsed = ramUsed,
                 totalRam = totalRam,
                 ramUsagePercent = ramUsagePercent,
@@ -212,7 +213,7 @@ namespace PolMon
                 svGPUTemp = GetGPUTemperature(),
                 svGPULoad = GetGPULoad(),
                 svFANAvgSpeed = GetFansAvgSpeed(),
-                svTestVar2 = GetFansAvgSpeed(),
+                svTestVar2 = GetCPULoad(),
             };
 
         }
@@ -241,7 +242,7 @@ namespace PolMon
         static async Task ServeHtmlResponse(HttpListenerResponse response)
         {
             string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string htmlFilePath = Path.Combine(exeDirectory, "index.html");
+            string htmlFilePath = Path.Combine(exeDirectory, "html\\index.html");
 
             string html = File.ReadAllText(htmlFilePath);
             byte[] buffer = Encoding.UTF8.GetBytes(html);
@@ -258,210 +259,5 @@ namespace PolMon
             }
             response.Close();
         }
-
-
-        // Helper methods
-        static float GetTotalPhysicalMemory()
-        {
-            var searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
-            foreach (ManagementObject obj in searcher.Get())
-                return Convert.ToSingle(obj["TotalVisibleMemorySize"]) / 1024; // Convert to MB
-            return 0;
-        }
-
-        static string FormatBytes(float bytes)
-        {
-            return HtmlBuilder.FormatBytes(bytes);
-        }
-
-        static float GetPagingFileUsagePercent()
-        {
-            float totalSize = 0;
-            float currentUsage = 0;
-            var searcher = new ManagementObjectSearcher("SELECT AllocatedBaseSize, CurrentUsage FROM Win32_PageFileUsage");
-            foreach (ManagementObject obj in searcher.Get())
-            {
-                totalSize += Convert.ToUInt32(obj["AllocatedBaseSize"]);
-                currentUsage += Convert.ToUInt32(obj["CurrentUsage"]);
-            }
-            return totalSize > 0 ? (currentUsage / totalSize) * 100 : 0;
-        }
-
-        static float GetCPUTemperature()
-        {
-            var temperatures = new List<float>();
-
-            foreach (var hardwareItem in computer.Hardware)
-            {
-                if (hardwareItem.HardwareType == HardwareType.CPU)
-                {
-                    hardwareItem.Update();
-
-                    // Check sensors directly under the CPU hardware item
-                    foreach (var sensor in hardwareItem.Sensors)
-                    {
-                        if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
-                        {
-                            temperatures.Add(sensor.Value.Value);
-                        }
-                    }
-
-                    // Traverse sub-hardware
-                    foreach (var subHardware in hardwareItem.SubHardware)
-                    {
-                        subHardware.Update();
-
-                        foreach (var sensor in subHardware.Sensors)
-                        {
-                            if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
-                            {
-                                temperatures.Add(sensor.Value.Value);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return temperatures.Count > 0 ? temperatures.Average() : 0;
-        }
-        static float GetGPUTemperature()
-        {
-            var temperatures = new List<float>();
-
-            foreach (var hardwareItem in computer.Hardware)
-            {
-                if ( (hardwareItem.HardwareType == HardwareType.GpuNvidia) || (hardwareItem.HardwareType == HardwareType.GpuAti) )
-                {
-                    hardwareItem.Update();
-
-                    foreach (var sensor in hardwareItem.Sensors)
-                    {
-                        if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
-                        {
-                            temperatures.Add(sensor.Value.Value);
-                        }
-                    }
-                    // Traverse sub-hardware
-                    foreach (var subHardware in hardwareItem.SubHardware)
-                    {
-                        subHardware.Update();
-
-                        foreach (var sensor in subHardware.Sensors)
-                        {
-                            if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
-                            {
-                                temperatures.Add(sensor.Value.Value);
-                            }
-                        }
-                    }
-                }
-            }
-
-            return temperatures.Count > 0 ? temperatures.Average() : 0;
-        }
-
-        static float GetGPULoad()
-        {
-            var loads = new List<float>();
-
-            foreach (var hardwareItem in computer.Hardware)
-            {
-                if (hardwareItem.HardwareType == HardwareType.GpuNvidia || hardwareItem.HardwareType == HardwareType.GpuAti)
-                {
-                    hardwareItem.Update();
-
-                    foreach (var sensor in hardwareItem.Sensors)
-                    {
-                        if (sensor.SensorType == SensorType.Load && sensor.Value.HasValue)
-                        {
-                            if (sensor.Name.Equals("GPU Core", StringComparison.InvariantCultureIgnoreCase))
-                            {
-                                loads.Add(sensor.Value.Value);
-                            }
-                        }
-                    }
-
-                    foreach (var subHardware in hardwareItem.SubHardware)
-                    {
-                        subHardware.Update();
-
-                        foreach (var sensor in subHardware.Sensors)
-                        {
-                            if (sensor.SensorType == SensorType.Load && sensor.Value.HasValue)
-                            {
-                                if (sensor.Name.Equals("GPU Core", StringComparison.InvariantCultureIgnoreCase))
-                                {
-                                    loads.Add(sensor.Value.Value);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (loads.Count <= 0) return 0;
-            // Calculate and return the average GPU load
-            return loads.Count > 0 ? loads.Average() : 0;
-        }
-
-        static float GetFansAvgSpeed()
-        {
-            var fans = new List<float>();
-
-            foreach (var hardwareItem in computer.Hardware)
-            {
-                if (hardwareItem.HardwareType == HardwareType.Mainboard)
-                {
-                    hardwareItem.Update();
-
-                    foreach (var sensor in hardwareItem.Sensors)
-                    {
-                        if (sensor.SensorType == SensorType.Fan && sensor.Value.HasValue)
-                        {
-                            fans.Add(sensor.Value.Value);
-                        }
-                    }
-
-                    foreach (var subHardware in hardwareItem.SubHardware)
-                    {
-                        subHardware.Update();
-
-                        foreach (var sensor in subHardware.Sensors)
-                        {
-                            if (sensor.SensorType == SensorType.Fan && sensor.Value.HasValue)
-                            {
-                                fans.Add(sensor.Value.Value);
-                            }
-                        }
-                    }
-                }
-            }
-            return fans.Count > 0 ? fans.Average() : 0;
-        }
-
-
     }
-
-    // Data class to hold performance data
-    public class PerformanceData
-    {
-        public float cpuUsage { get; set; }
-        public float ramUsed { get; set; }
-        public float totalRam { get; set; }
-        public float ramUsagePercent { get; set; }
-        public float networkUsage { get; set; }
-        public string diskReadFormatted { get; set; }
-        public string diskWriteFormatted { get; set; }
-        public float pagingUsage { get; set; }
-        public string uptime { get; set; }
-        public int processCount { get; set; }
-        public int threadCount { get; set; }
-        public string svMachineName { get; set; }
-        public float svTestVar2 { get; set; }
-        public float svCPUTemp { get; set; }
-        public float svGPUTemp { get; set; }
-        public float svGPULoad { get; set; }
-        public float svFANAvgSpeed { get; set; }
-    }
-
 }

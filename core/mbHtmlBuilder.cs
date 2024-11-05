@@ -13,7 +13,7 @@ using System.IO;
 
 namespace PolMon
 {
-    public static class HtmlBuilder
+    public static partial class HtmlBuilder
     {
         public static string BuildHtmlContent(PerformanceData data)
         {

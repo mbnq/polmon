@@ -115,7 +115,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.3.2/justgage.min.js"></script>
 </head>
 <body>
-    <h1>PolMon 🖥️</h1>
+    <h1>PolMon 🖥️ -  <span id="machineNameHeader"></span></h1>
     <div class="container">
         <div class="gauges">
             <div class="gauge" id="cpuGauge">
@@ -255,6 +255,8 @@
                 document.getElementById('svMachineNameStr').innerText = data.svMachineName;
                 document.getElementById('svCPUTempStr').innerText = data.svCPUTemp;
                 document.getElementById('svTestVar2Str').innerText = data.svTestVar2;
+
+                document.getElementById('machineNameHeader').innerText = data.svMachineName;
             } catch (error) {
                 console.error('Error fetching data:', error);
             }

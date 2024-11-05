@@ -27,7 +27,7 @@ namespace PolMon
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";
         public static int svRefreshTime = 500; // in milliseconds
-        public static string svTestVar = "n/a";
+        public static string svMachineName = Environment.MachineName;
         public static float svTestVar2 = 0.00f;
         public static float svCPUTemp = 0.00f;
 
@@ -164,7 +164,7 @@ namespace PolMon
                 uptime = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s",
                 processCount = processCount,
                 threadCount = threadCount,
-                svMachineName = Environment.MachineName,
+                svMachineName = svMachineName,
                 svCPUTemp = GetCPUTemperature(),
                 svTestVar2 = GetCPUTemperature()
             };

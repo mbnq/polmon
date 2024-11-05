@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Management;
 using System.Net;
@@ -125,7 +126,7 @@ namespace PolMon
                 else
                 {
                     // Serve HTML content
-                    await ServeHtmlResponse(response, data);
+                    await ServeHtmlResponse(response);
                 }
             }
 
@@ -169,7 +170,7 @@ namespace PolMon
                 svMachineName = Environment.MachineName,
                 svCPUTemp = GetCPUTemperature(),
                 svGPUTemp = GetGPUTemperature(),
-                svTestVar2 = 1.00f
+                svTestVar2 = 1.00f,
             };
 
         }
@@ -197,9 +198,12 @@ namespace PolMon
         }
 
 
-        static async Task ServeHtmlResponse(HttpListenerResponse response, PerformanceData data)
+        static async Task ServeHtmlResponse(HttpListenerResponse response)
         {
-            string html = HtmlBuilder.BuildHtmlContent(data);
+            string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string htmlFilePath = Path.Combine(exeDirectory, "index.html");
+
+            string html = File.ReadAllText(htmlFilePath);
             byte[] buffer = Encoding.UTF8.GetBytes(html);
             response.ContentType = "text/html; charset=utf-8";
             response.ContentEncoding = Encoding.UTF8;
@@ -214,6 +218,7 @@ namespace PolMon
             }
             response.Close();
         }
+
 
         // Helper methods
         static float GetTotalPhysicalMemory()

@@ -271,16 +271,16 @@
                 document.getElementById('processCount').innerText = data.processCount;
                 document.getElementById('threadCount').innerText = data.threadCount;
                 document.getElementById('svMachineNameStr').innerText = data.svMachineName;
-                document.getElementById('svCPUTempStr').innerText = data.svCPUTemp;
-                document.getElementById('svGPUTempStr').innerText = data.svGPUTemp;
                 document.getElementById('svTestVar2Str').innerText = data.svTestVar2;
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         }
 
-        fetchData();
-        setInterval(fetchData, 1000);
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchData();
+            setInterval(fetchData, 1000);
+        });
     </script>
 </body>
 </html>

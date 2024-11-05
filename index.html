@@ -134,6 +134,10 @@
                 <div id="pageFileGaugeContainer" class="gauge-container"></div>
                 <div class="gauge-label">Page File Usage</div>
             </div>
+            <div class="gauge" id="cpuTempGauge">
+                <div id="cpuTempGaugeContainer" class="gauge-container"></div>
+                <div class="gauge-label">CPU Temperature</div>
+            </div>
         </div>
         <div class="info">
             <p><strong>Disk Read:</strong> <span id="diskRead"></span>/s</p>
@@ -142,7 +146,7 @@
             <p><strong>Process Count:</strong> <span id="processCount"></span></p>
             <p><strong>Thread Count:</strong> <span id="threadCount"></span></p>
             <p><strong>Machine Name:</strong> <span id="svMachineNameStr"></span></p>
-            <p><strong>CPU Temp:</strong> <span id="svCPUTempStr"></span> <t> C</t></p>
+            <p><strong>CPU Temp:</strong> <span id="svCPUTempStr"></span>°C</p>
             <p><strong>svTestVar2:</strong> <span id="svTestVar2Str"></span></p>
         </div>
     </div>
@@ -214,6 +218,21 @@
             counter: true
         });
 
+        var cpuTempGauge = new JustGage({
+            id: "cpuTempGaugeContainer",
+            value: 0,
+            min: 0,
+            max: 100,
+            title: "",
+            label: "%",
+            gaugeColor: "#444",
+            levelColors: ["#FFD700"],
+            valueFontColor: "#f0f0f0",
+            gaugeWidthScale: 0.6,
+            noGradient: true,
+            counter: true
+        });
+
         // Fetch data from the server and update the gauges
         async function fetchData() {
             try {
@@ -226,6 +245,7 @@
                 if (networkUsagePercent > 100) networkUsagePercent = 100;
                 networkGauge.refresh(networkUsagePercent);
                 pageFileGauge.refresh(data.pagingUsage);
+                cpuTempGauge.refresh(Number(data.svCPUTemp));
 
                 document.getElementById('diskRead').innerText = data.diskReadFormatted;
                 document.getElementById('diskWrite').innerText = data.diskWriteFormatted;

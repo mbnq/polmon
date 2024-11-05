@@ -24,7 +24,7 @@ namespace PolMon
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";
         public static int svRefreshTime = 500; // in milliseconds
-        public static string svTestVar = "test";
+        public static string svTestVar = "n/a";
         public static string svTestVar2 = "test222";
 
         static async Task Main(string[] args)
@@ -151,7 +151,7 @@ namespace PolMon
                 uptime = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s",
                 processCount = processCount,
                 threadCount = threadCount,
-                svTestVar = svTestVar,
+                svTestVar = Environment.MachineName,
                 svTestVar2 = svTestVar2
             };
 

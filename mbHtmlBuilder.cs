@@ -35,7 +35,8 @@ namespace PolMon
             string networkUsageFormatted = FormatBytes(data.networkUsage);
             string processCountStr = data.processCount.ToString(CultureInfo.InvariantCulture);
             string threadCountStr = data.threadCount.ToString(CultureInfo.InvariantCulture);
-            string svTestVarStr = data.svMachineName;
+            string svMachineNameStr = data.svMachineName;
+            string svCPUTempStr = data.svCPUTemp.ToString();
             string svTestVar2Str = data.svTestVar2.ToString();
 
             // Replace placeholders with actual values
@@ -51,7 +52,8 @@ namespace PolMon
                        .Replace("{{processCount}}", processCountStr)
                        .Replace("{{threadCount}}", threadCountStr)
                        .Replace("{{networkUsageNumeric}}", networkUsageNumericStr)
-                       .Replace("{{svTestVarStr}}", svTestVarStr)
+                       .Replace("{{svMachineNameStr}}", svMachineNameStr)
+                       .Replace("{{svCPUTempStr}}", svCPUTempStr)
                        .Replace("{{svTestVar2Str}}", svTestVar2Str);
 
             return html;

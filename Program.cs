@@ -165,6 +165,7 @@ namespace PolMon
                 processCount = processCount,
                 threadCount = threadCount,
                 svMachineName = Environment.MachineName,
+                svCPUTemp = GetCPUTemperature(),
                 svTestVar2 = GetCPUTemperature()
             };
 
@@ -294,6 +295,7 @@ namespace PolMon
         public int threadCount { get; set; }
         public string svMachineName { get; set; }
         public float svTestVar2 { get; set; }
+        public float svCPUTemp { get; set; }
     }
 
 }

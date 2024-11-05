@@ -142,6 +142,7 @@
             <p><strong>Process Count:</strong> <span id="processCount"></span></p>
             <p><strong>Thread Count:</strong> <span id="threadCount"></span></p>
             <p><strong>Machine Name:</strong> <span id="svMachineNameStr"></span></p>
+            <p><strong>CPU Temp:</strong> <span id="svCPUTempStr"></span> <t> C</t></p>
             <p><strong>svTestVar2:</strong> <span id="svTestVar2Str"></span></p>
         </div>
     </div>
@@ -232,6 +233,7 @@
                 document.getElementById('processCount').innerText = data.processCount;
                 document.getElementById('threadCount').innerText = data.threadCount;
                 document.getElementById('svMachineNameStr').innerText = data.svMachineName;
+                document.getElementById('svCPUTempStr').innerText = data.svCPUTemp;
                 document.getElementById('svTestVar2Str').innerText = data.svTestVar2;
             } catch (error) {
                 console.error('Error fetching data:', error);

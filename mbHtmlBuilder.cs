@@ -36,7 +36,7 @@ namespace PolMon
             string processCountStr = data.processCount.ToString(CultureInfo.InvariantCulture);
             string threadCountStr = data.threadCount.ToString(CultureInfo.InvariantCulture);
             string svTestVarStr = data.svMachineName;
-            string svTestVar2Str = data.svTestVar2;
+            string svTestVar2Str = data.svTestVar2.ToString();
 
             // Replace placeholders with actual values
             html = html.Replace("{{cpuUsage}}", cpuUsageStr)

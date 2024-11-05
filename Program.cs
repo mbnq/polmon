@@ -8,14 +8,17 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Management;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using OpenHardwareMonitor.Hardware;
 
 namespace PolMon
 {
@@ -25,13 +28,23 @@ namespace PolMon
         public static string svIP = "127.0.0.1";
         public static int svRefreshTime = 500; // in milliseconds
         public static string svTestVar = "n/a";
-        public static string svTestVar2 = "test222";
+        public static float svTestVar2 = 0.00f;
+        public static float svCPUTemp = 0.00f;
+
+
+        public static Computer computer = new Computer
+        {
+            CPUEnabled = true,
+            MainboardEnabled = true
+        };
 
         static async Task Main(string[] args)
         {
             MbConsole.ParseArguments(args);
             MbConsole.ConfigureConsole();
             Console.WriteLine("Initializing...");
+
+            computer.Open();
 
             // Initialize performance counters
             var cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
@@ -152,7 +165,7 @@ namespace PolMon
                 processCount = processCount,
                 threadCount = threadCount,
                 svMachineName = Environment.MachineName,
-                svTestVar2 = svTestVar2
+                svTestVar2 = GetCPUTemperature()
             };
 
         }
@@ -224,6 +237,45 @@ namespace PolMon
             }
             return totalSize > 0 ? (currentUsage / totalSize) * 100 : 0;
         }
+
+        static float GetCPUTemperature()
+        {
+            var temperatures = new List<float>();
+
+            foreach (var hardwareItem in computer.Hardware)
+            {
+                if (hardwareItem.HardwareType == HardwareType.CPU)
+                {
+                    hardwareItem.Update();
+
+                    // Check sensors directly under the CPU hardware item
+                    foreach (var sensor in hardwareItem.Sensors)
+                    {
+                        if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
+                        {
+                            temperatures.Add(sensor.Value.Value);
+                        }
+                    }
+
+                    // Traverse sub-hardware
+                    foreach (var subHardware in hardwareItem.SubHardware)
+                    {
+                        subHardware.Update();
+
+                        foreach (var sensor in subHardware.Sensors)
+                        {
+                            if (sensor.SensorType == SensorType.Temperature && sensor.Value.HasValue)
+                            {
+                                temperatures.Add(sensor.Value.Value);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return temperatures.Count > 0 ? temperatures.Average() : 0;
+        }
+
     }
 
     // Data class to hold performance data
@@ -241,7 +293,7 @@ namespace PolMon
         public int processCount { get; set; }
         public int threadCount { get; set; }
         public string svMachineName { get; set; }
-        public string svTestVar2 { get; set; }
+        public float svTestVar2 { get; set; }
     }
 
 }

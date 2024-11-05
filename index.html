@@ -141,6 +141,7 @@
             <p><strong>System Uptime:</strong> <span id="uptime"></span></p>
             <p><strong>Process Count:</strong> <span id="processCount"></span></p>
             <p><strong>Thread Count:</strong> <span id="threadCount"></span></p>
+            <p><strong>svTestVar:</strong> <span id="svTestVarStr"></span></p>
         </div>
     </div>
     <script>
@@ -229,6 +230,7 @@
                 document.getElementById('uptime').innerText = data.uptime;
                 document.getElementById('processCount').innerText = data.processCount;
                 document.getElementById('threadCount').innerText = data.threadCount;
+                document.getElementById('svTestVarStr').innerText = data.svTestVarStr;
             } catch (error) {
                 console.error('Error fetching data:', error);
             }

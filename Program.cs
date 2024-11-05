@@ -16,6 +16,7 @@ namespace polmon
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";
         public static int svRefreshTime = 500; // in milliseconds
+        public static string svTestVar = "test";
 
         static async Task Main(string[] args)
         {
@@ -58,6 +59,7 @@ namespace polmon
             Console.WriteLine("Init: ok!");
             Console.WriteLine($"Server started: {svIP}, Port: {svPort}, Refresh Time: {svRefreshTime}ms");
 
+            // main loop -------------------------------------------------------------------------------------
             while (true)
             {
                 HttpListenerContext context;
@@ -68,12 +70,12 @@ namespace polmon
                 catch (HttpListenerException ex)
                 {
                     Console.WriteLine($"HTTP Listener Exception: {ex.Message}");
-                    break; // Exit the loop if the listener is stopped
+                    break;
                 }
                 catch (InvalidOperationException ex)
                 {
                     Console.WriteLine($"Invalid Operation: {ex.Message}");
-                    break; // Exit the loop if the listener is stopped
+                    break;
                 }
 
                 var response = context.Response;
@@ -121,6 +123,8 @@ namespace polmon
                 string diskReadFormatted = FormatBytes(diskRead);
                 string diskWriteFormatted = FormatBytes(diskWrite);
 
+                string svTestVar = Program.svTestVar;
+
                 if (request.RawUrl == "/data")
                 {
                     // Serve JSON data
@@ -137,7 +141,8 @@ namespace polmon
                         pagingUsage,
                         uptime = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s",
                         processCount,
-                        threadCount
+                        threadCount,
+                        svTestVar
                     };
 
                     string jsonData = JsonConvert.SerializeObject(data);
@@ -170,7 +175,9 @@ namespace polmon
                         pagingUsage,
                         uptimeSpan,
                         processCount,
-                        threadCount);
+                        threadCount,
+                        svTestVar
+                    );
 
                     byte[] buffer = Encoding.UTF8.GetBytes(html);
                     response.ContentType = "text/html; charset=utf-8";

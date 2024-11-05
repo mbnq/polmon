@@ -94,7 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="mbConsole.cs" />
-    <Compile Include="mbHtmlPayload.cs" />
+    <Compile Include="mbHtmlBuilder.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

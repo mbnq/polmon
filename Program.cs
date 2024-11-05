@@ -208,7 +208,7 @@ namespace PolMon
                 svGPUTemp = GetGPUTemperature(),
                 svGPULoad = GetGPULoad(),
                 svFANAvgSpeed = GetFansAvgSpeed(),
-                svTestVar2 = GetCPULoad(),
+                svTestVar2 = GetGPUFanSpeed(),
             };
 
         }

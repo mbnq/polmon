@@ -138,6 +138,8 @@ namespace PolMon
 
                     foreach (var sensor in hardwareItem.Sensors)
                     {
+                        // Console.WriteLine(sensor.Name);
+
                         if (sensor.SensorType == SensorType.Load && sensor.Value.HasValue)
                         {
                             if (sensor.Name.Equals("GPU Core", StringComparison.InvariantCultureIgnoreCase))
@@ -168,6 +170,40 @@ namespace PolMon
             if (loads.Count <= 0) return 0;
             // Calculate and return the average GPU load
             return loads.Count > 0 ? loads.Average() : 0;
+        }
+        static float GetGPUFanSpeed()
+        {
+            var fans = new List<float>();
+
+            foreach (var hardwareItem in computer.Hardware)
+            {
+                if (new[] { HardwareType.GpuNvidia, HardwareType.GpuAti }.Contains(hardwareItem.HardwareType))
+                {
+                    hardwareItem.Update();
+
+                    foreach (var sensor in hardwareItem.Sensors)
+                    {
+                        if (sensor.SensorType == SensorType.Fan && sensor.Value.HasValue)
+                        {
+                            fans.Add(sensor.Value.Value);
+                        }
+                    }
+
+                    foreach (var subHardware in hardwareItem.SubHardware)
+                    {
+                        subHardware.Update();
+
+                        foreach (var sensor in subHardware.Sensors)
+                        {
+                            if (sensor.SensorType == SensorType.Fan && sensor.Value.HasValue)
+                            {
+                                fans.Add(sensor.Value.Value);
+                            }
+                        }
+                    }
+                }
+            }
+            return fans.Count > 0 ? fans.Average() : 0;
         }
         static float GetCPULoad()
         {

@@ -16,10 +16,15 @@ using System.Linq;
 using System.Management;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using OpenHardwareMonitor.Hardware;
+using static System.Net.Mime.MediaTypeNames;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Threading;
 
 namespace PolMon
 {
@@ -34,16 +39,39 @@ namespace PolMon
         public static float svGPUTemp = 0.00f;
         public static float svGPULoad = 0.00f;
 
-
         public static Computer computer = new Computer
         {
             CPUEnabled = true,
             MainboardEnabled = true,
             GPUEnabled = true
         };
-
         static async Task Main(string[] args)
         {
+
+            #if !DEBUG
+            if (!IsAdministrator())
+            {
+                try
+                {
+                    ProcessStartInfo proc = new ProcessStartInfo
+                    {
+                        UseShellExecute = true,
+                        WorkingDirectory = Environment.CurrentDirectory,
+                        FileName = Process.GetCurrentProcess().MainModule.FileName,
+                        Verb = "runas"
+                    };
+                    Process.Start(proc);
+                }
+                catch
+                {
+                    Console.WriteLine("This application requires administrator privileges to run.");
+                }
+                Console.ReadKey();
+                Environment.Exit(0);
+                return;
+            }
+            #endif
+
             MbConsole.ParseArguments(args);
             MbConsole.ConfigureConsole();
             Console.WriteLine("Initializing...");
@@ -133,7 +161,12 @@ namespace PolMon
 
             listener.Close();
         }
-
+        private static bool IsAdministrator()
+        {
+            WindowsIdentity identity = WindowsIdentity.GetCurrent();
+            WindowsPrincipal principal = new WindowsPrincipal(identity);
+            return principal.IsInRole(WindowsBuiltInRole.Administrator);
+        }
         static PerformanceData GatherPerformanceData(
             PerformanceCounter cpuCounter,
             PerformanceCounter ramCounter,

@@ -300,16 +300,6 @@ namespace PolMon
             private static PerformanceCounter diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
             private static PerformanceCounter diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
 
-            static DiskMonitor() // Static constructor without a return type
-            {
-                // Initial call to get accurate first values (PerformanceCounter sometimes requires a delay)
-                diskReadCounter.NextValue();
-                diskWriteCounter.NextValue();
-
-                // Give the counters a moment to start returning accurate values
-                Thread.Sleep(1000);
-            }
-
             public static float GetTotalReadSpeed()
             {
                 return diskReadCounter.NextValue();

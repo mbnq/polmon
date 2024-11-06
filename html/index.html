@@ -121,7 +121,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.3.2/justgage.min.js"></script>
 </head>
 <body>
-    <h1>PolMon 🖥️ - <span id="svMachineNameStr"></span></h1>
+    <h1>PolMon 🖥️ - <span id="svMachineName"></span></h1>
     <div class="container">
         <div class="gauges">
             <div class="gauge" id="cpuGauge">
@@ -167,7 +167,7 @@
             <p><strong>System Uptime:</strong> <span id="uptime"></span></p>
             <p><strong>Process Count:</strong> <span id="processCount"></span></p>
             <p><strong>Thread Count:</strong> <span id="threadCount"></span></p>
-            <p><strong>Test Variable:</strong> <span id="svTestVar2Str"></span></p>
+            <p><strong>Test Variable:</strong> <span id="svTestVar2"></span></p>
         </div>
     </div>
 
@@ -444,8 +444,8 @@
                 document.getElementById('uptime').innerText = data.uptime;
                 document.getElementById('processCount').innerText = data.processCount;
                 document.getElementById('threadCount').innerText = data.threadCount;
-                document.getElementById('svMachineNameStr').innerText = data.svMachineName;
-                document.getElementById('svTestVar2Str').innerText = data.svTestVar2;
+                document.getElementById('svMachineName').innerText = data.svMachineName;
+                document.getElementById('svTestVar2').innerText = data.svTestVar2;
             } catch (error) {
                 console.error('Error fetching data:', error);
             }

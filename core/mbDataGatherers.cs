@@ -30,17 +30,6 @@ namespace PolMon
 {
     partial class Program
     {
-        static string FormatBytes(float bytes)
-        {
-            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
-            int order = 0;
-            while (bytes >= 1024 && order < sizes.Length - 1)
-            {
-                order++;
-                bytes /= 1024;
-            }
-            return $"{bytes:0.##} {sizes[order]}";
-        }
         static float GetTotalPhysicalMemory()
         {
             var searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
@@ -292,6 +281,18 @@ namespace PolMon
         }
 
         // ----------------- Disk Monitor -----------------
+        static string FormatBytes(float bytes)
+        {
+            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
+            int order = 0;
+            while (bytes >= 1024 && order < sizes.Length - 1)
+            {
+                order++;
+                bytes /= 1024;
+            }
+            return $"{bytes:0.##} {sizes[order]}";
+        }
+
         private static PerformanceCounter diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
         private static PerformanceCounter diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
         public class DiskMonitor
@@ -319,6 +320,7 @@ namespace PolMon
                 return diskWriteCounter.NextValue();
             }
         }
+
         // ----------------- Disk Monitor -----------------
     }
 }

@@ -49,7 +49,7 @@ namespace PolMon
                 svGPULoad = GetGPULoad(),
                 svFANAvgSpeed = GetFansAvgSpeed(),
                 svGPUFanSpeed = GetGPUFanSpeed(),
-                svTestVar2 = 0.00f,
+                svTestVar2 = Environment.TickCount,
             };
 
         }

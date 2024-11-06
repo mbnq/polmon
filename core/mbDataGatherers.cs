@@ -10,21 +10,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Management;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
 using OpenHardwareMonitor.Hardware;
-using static System.Net.Mime.MediaTypeNames;
-using System.Runtime.InteropServices;
-using System.Security;
-using System.Threading;
 
 namespace PolMon
 {

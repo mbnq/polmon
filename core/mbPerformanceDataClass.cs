@@ -28,7 +28,6 @@ namespace PolMon
         public float svGPUTemp { get; set; }
         public float svGPULoad { get; set; }
         public float svFANAvgSpeed { get; set; }
-        public float svCPULoad { get; set; }
         public float svGPUFanSpeed { get; set; }
     }
 }

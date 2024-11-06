@@ -6,6 +6,7 @@
     mbnq00 on gmail
 
 */
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -29,15 +30,6 @@ namespace PolMon
 {
     partial class Program
     {
-
-        // Helper methods
-        static float GetTotalPhysicalMemory()
-        {
-            var searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
-            foreach (ManagementObject obj in searcher.Get())
-                return Convert.ToSingle(obj["TotalVisibleMemorySize"]) / 1024; // Convert to MB
-            return 0;
-        }
         static string FormatBytes(float bytes)
         {
             string[] sizes = { "B", "KB", "MB", "GB", "TB" };
@@ -48,6 +40,13 @@ namespace PolMon
                 bytes /= 1024;
             }
             return $"{bytes:0.##} {sizes[order]}";
+        }
+        static float GetTotalPhysicalMemory()
+        {
+            var searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
+            foreach (ManagementObject obj in searcher.Get())
+                return Convert.ToSingle(obj["TotalVisibleMemorySize"]) / 1024; // Convert to MB
+            return 0;
         }
         static float GetPagingFileUsagePercent()
         {
@@ -291,5 +290,35 @@ namespace PolMon
             }
             return fans.Count > 0 ? fans.Average() : 0;
         }
+
+        // ----------------- Disk Monitor -----------------
+        private static PerformanceCounter diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
+        private static PerformanceCounter diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
+        public class DiskMonitor
+        {
+            private static PerformanceCounter diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
+            private static PerformanceCounter diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
+
+            static DiskMonitor() // Static constructor without a return type
+            {
+                // Initial call to get accurate first values (PerformanceCounter sometimes requires a delay)
+                diskReadCounter.NextValue();
+                diskWriteCounter.NextValue();
+
+                // Give the counters a moment to start returning accurate values
+                Thread.Sleep(1000);
+            }
+
+            public static float GetTotalReadSpeed()
+            {
+                return diskReadCounter.NextValue();
+            }
+
+            public static float GetTotalWriteSpeed()
+            {
+                return diskWriteCounter.NextValue();
+            }
+        }
+        // ----------------- Disk Monitor -----------------
     }
 }

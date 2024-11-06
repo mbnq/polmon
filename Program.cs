@@ -200,8 +200,8 @@ namespace PolMon
                 totalRam = totalRam,
                 ramUsagePercent = ramUsagePercent,
                 networkUsage = networkUsage,
-                diskReadFormatted = FormatBytes(diskRead),
-                diskWriteFormatted = FormatBytes(diskWrite),
+                diskReadFormatted = FormatBytes(DiskMonitor.GetTotalReadSpeed()),
+                diskWriteFormatted = FormatBytes(DiskMonitor.GetTotalWriteSpeed()),
                 pagingUsage = pagingUsage,
                 uptime = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s",
                 processCount = processCount,
@@ -212,7 +212,7 @@ namespace PolMon
                 svGPULoad = GetGPULoad(),
                 svFANAvgSpeed = GetFansAvgSpeed(),
                 svGPUFanSpeed = GetGPUFanSpeed(),
-                svTestVar2 = GetGPUFanSpeed(),
+                svTestVar2 = DiskMonitor.GetTotalReadSpeed(),
             };
 
         }

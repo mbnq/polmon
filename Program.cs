@@ -19,15 +19,12 @@ using System.IO;
 using System.Linq;
 using System.Management;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using OpenHardwareMonitor.Hardware;
-using static System.Net.Mime.MediaTypeNames;
 using System.Runtime.InteropServices;
-using System.Security;
 using System.Threading;
 
 namespace PolMon
@@ -111,6 +108,7 @@ namespace PolMon
             catch (HttpListenerException ex)
             {
                 Console.WriteLine($"Error starting HTTP listener: {ex.Message}");
+                Console.ReadKey();
                 return;
             }
 
@@ -126,6 +124,7 @@ namespace PolMon
                 catch (Exception ex) when (ex is HttpListenerException || ex is InvalidOperationException)
                 {
                     Console.WriteLine($"Listener exception: {ex.Message}");
+                    Console.ReadKey();
                     break;
                 }
 
@@ -217,6 +216,7 @@ namespace PolMon
             catch (HttpListenerException ex)
             {
                 Console.WriteLine($"Error writing response: {ex.Message}");
+                Console.ReadKey();
             }
             response.Close();
         }
@@ -237,6 +237,7 @@ namespace PolMon
             catch (HttpListenerException ex)
             {
                 Console.WriteLine($"Error writing response: {ex.Message}");
+                Console.ReadKey();
             }
             response.Close();
         }

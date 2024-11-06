@@ -292,9 +292,6 @@ namespace PolMon
             }
             return $"{bytes:0.##} {sizes[order]}";
         }
-
-        private static PerformanceCounter diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
-        private static PerformanceCounter diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
         public class DiskMonitor
         {
             private static PerformanceCounter diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
@@ -310,7 +307,6 @@ namespace PolMon
                 return diskWriteCounter.NextValue();
             }
         }
-
         // ----------------- Disk Monitor -----------------
     }
 }

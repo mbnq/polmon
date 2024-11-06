@@ -280,21 +280,20 @@ namespace PolMon
             }
             return $"{bytes:0.##} {sizes[order]}";
         }
-        public class DiskMonitor
+
+        private static PerformanceCounter diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
+        private static PerformanceCounter diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
+
+        public static float GetTotalReadSpeed()
         {
-            private static PerformanceCounter diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
-            private static PerformanceCounter diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
-
-            public static float GetTotalReadSpeed()
-            {
-                return diskReadCounter.NextValue();
-            }
-
-            public static float GetTotalWriteSpeed()
-            {
-                return diskWriteCounter.NextValue();
-            }
+            return diskReadCounter.NextValue();
         }
+
+        public static float GetTotalWriteSpeed()
+        {
+            return diskWriteCounter.NextValue();
+        }
+
         // ----------------- Disk Monitor -----------------
     }
 }

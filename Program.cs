@@ -21,7 +21,7 @@ namespace PolMon
 {
     partial class Program
     {
-        public const string mbVersion = "0.0.0.2";
+        public const string mbVersion = "0.0.0.3";
 
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";

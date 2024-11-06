@@ -36,7 +36,7 @@ namespace PolMon
             catch (HttpListenerException ex)
             {
                 Console.WriteLine($"Error writing response: {ex.Message}");
-                Console.ReadKey();
+                // Console.ReadKey();
             }
             response.Close();
         }
@@ -57,7 +57,7 @@ namespace PolMon
             catch (HttpListenerException ex)
             {
                 Console.WriteLine($"Error writing response: {ex.Message}");
-                Console.ReadKey();
+                // Console.ReadKey();
             }
             response.Close();
         }

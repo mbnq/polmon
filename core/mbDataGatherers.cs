@@ -18,6 +18,43 @@ namespace PolMon
 {
     partial class Program
     {
+        static PerformanceData GatherPerformanceData(PerformanceCounter ramCounter, PerformanceCounter uptimeCounter, PerformanceCounter[] networkCounters)
+        {
+            var ramAvailable = ramCounter.NextValue();
+            var networkUsage = networkCounters.Sum(counter => counter.NextValue());
+            var pagingUsage = GetPagingFileUsagePercent();
+            TimeSpan uptimeSpan = TimeSpan.FromSeconds(uptimeCounter.NextValue());
+            var processCount = Process.GetProcesses().Length;
+            var threadCount = Process.GetProcesses().Sum(p => p.Threads.Count);
+            var totalRam = GetTotalPhysicalMemory();
+            var ramUsed = totalRam - ramAvailable;
+            var ramUsagePercent = (ramUsed / totalRam) * 100;
+
+            return new PerformanceData
+            {
+                cpuUsage = GetCPULoad(),
+                ramUsed = ramUsed,
+                totalRam = totalRam,
+                ramUsagePercent = ramUsagePercent,
+                networkUsage = networkUsage,
+                diskReadFormatted = FormatBytes(GetTotalReadSpeed()),
+                diskWriteFormatted = FormatBytes(GetTotalWriteSpeed()),
+                pagingUsage = pagingUsage,
+                uptime = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s",
+                processCount = processCount,
+                threadCount = threadCount,
+                svMachineName = Environment.MachineName,
+                svCPUTemp = GetCPUTemperature(),
+                svGPUTemp = GetGPUTemperature(),
+                svGPULoad = GetGPULoad(),
+                svFANAvgSpeed = GetFansAvgSpeed(),
+                svGPUFanSpeed = GetGPUFanSpeed(),
+                svTestVar2 = 0.00f,
+            };
+
+        }
+
+        // ----------------- Hardware Monitor -------------
         static float GetTotalPhysicalMemory()
         {
             var searcher = new ManagementObjectSearcher("SELECT TotalVisibleMemorySize FROM Win32_OperatingSystem");
@@ -283,12 +320,10 @@ namespace PolMon
 
         private static PerformanceCounter diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
         private static PerformanceCounter diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
-
         public static float GetTotalReadSpeed()
         {
             return diskReadCounter.NextValue();
         }
-
         public static float GetTotalWriteSpeed()
         {
             return diskWriteCounter.NextValue();

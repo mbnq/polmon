@@ -11,13 +11,10 @@
 
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Principal;
-using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using OpenHardwareMonitor.Hardware;
 
 namespace PolMon
@@ -107,6 +104,7 @@ namespace PolMon
 
             Console.WriteLine($"Server started at http://{svIP}:{svPort}/");
 
+            // Main loop
             while (true)
             {
                 HttpListenerContext context;
@@ -155,84 +153,6 @@ namespace PolMon
             WindowsIdentity identity = WindowsIdentity.GetCurrent();
             WindowsPrincipal principal = new WindowsPrincipal(identity);
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
-        }
-        static PerformanceData GatherPerformanceData(PerformanceCounter ramCounter,PerformanceCounter uptimeCounter,PerformanceCounter[] networkCounters)
-        {
-            var ramAvailable = ramCounter.NextValue();
-            var networkUsage = networkCounters.Sum(counter => counter.NextValue());
-            var pagingUsage = GetPagingFileUsagePercent();
-            TimeSpan uptimeSpan = TimeSpan.FromSeconds(uptimeCounter.NextValue());
-            var processCount = Process.GetProcesses().Length;
-            var threadCount = Process.GetProcesses().Sum(p => p.Threads.Count);
-            var totalRam = GetTotalPhysicalMemory();
-            var ramUsed = totalRam - ramAvailable;
-            var ramUsagePercent = (ramUsed / totalRam) * 100;
-
-            return new PerformanceData
-            {
-                cpuUsage = GetCPULoad(),
-                ramUsed = ramUsed,
-                totalRam = totalRam,
-                ramUsagePercent = ramUsagePercent,
-                networkUsage = networkUsage,
-                diskReadFormatted = FormatBytes(GetTotalReadSpeed()),
-                diskWriteFormatted = FormatBytes(GetTotalWriteSpeed()),
-                pagingUsage = pagingUsage,
-                uptime = $"{uptimeSpan.Days}d {uptimeSpan.Hours}h {uptimeSpan.Minutes}m {uptimeSpan.Seconds}s",
-                processCount = processCount,
-                threadCount = threadCount,
-                svMachineName = Environment.MachineName,
-                svCPUTemp = GetCPUTemperature(),
-                svGPUTemp = GetGPUTemperature(),
-                svGPULoad = GetGPULoad(),
-                svFANAvgSpeed = GetFansAvgSpeed(),
-                svGPUFanSpeed = GetGPUFanSpeed(),
-                svTestVar2 = 0.00f,
-            };
-
-        }
-        static async Task ServeJsonResponse(HttpListenerResponse response, PerformanceData data)
-        {
-            var jsonSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new Newtonsoft.Json.Serialization.CamelCasePropertyNamesContractResolver()
-            };
-            string jsonData = JsonConvert.SerializeObject(data, jsonSettings);
-            byte[] buffer = Encoding.UTF8.GetBytes(jsonData);
-            response.ContentType = "application/json; charset=utf-8";
-            response.ContentEncoding = Encoding.UTF8;
-            response.ContentLength64 = buffer.Length;
-            try
-            {
-                await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-            }
-            catch (HttpListenerException ex)
-            {
-                Console.WriteLine($"Error writing response: {ex.Message}");
-                Console.ReadKey();
-            }
-            response.Close();
-        }
-        static async Task ServeHtmlResponse(HttpListenerResponse response)
-        {
-            string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string htmlFilePath = Path.Combine(exeDirectory, "html\\index.html");
-
-            string html = File.ReadAllText(htmlFilePath);
-            byte[] buffer = Encoding.UTF8.GetBytes(html);
-            response.ContentType = "text/html; charset=utf-8";
-            response.ContentEncoding = Encoding.UTF8;
-            response.ContentLength64 = buffer.Length;
-            try
-            {
-                await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-            }
-            catch (HttpListenerException ex)
-            {
-                Console.WriteLine($"Error writing response: {ex.Message}");
-                Console.ReadKey();
-            }
-            response.Close();
         }
     }
 }

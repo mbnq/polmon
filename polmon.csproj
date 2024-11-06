@@ -101,6 +101,7 @@
   <ItemGroup>
     <Compile Include="core\mbConsole.cs" />
     <Compile Include="core\mbDataGatherers.cs" />
+    <Compile Include="core\mbNet.cs" />
     <Compile Include="core\mbPerformanceDataClass.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

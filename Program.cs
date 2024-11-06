@@ -138,7 +138,7 @@ namespace PolMon
 
                 // Short delay to allow counters to update
                 await Task.Delay(svRefreshTime);
-                Console.WriteLine($"Request received: {request.RawUrl}");
+                Console.WriteLine($" {DateTime.Now.TimeOfDay} Request received: {request.RawUrl}");
 
                 // Gather data
                 var data = GatherPerformanceData(ramCounter, uptimeCounter, networkCounters);

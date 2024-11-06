@@ -135,18 +135,14 @@ namespace PolMon
                 // Initialize counters
                 ramCounter.NextValue();
                 uptimeCounter.NextValue();
-                foreach (var counter in networkCounters)
-                    counter.NextValue();
+                foreach (var counter in networkCounters) counter.NextValue();
 
                 // Short delay to allow counters to update
                 await Task.Delay(svRefreshTime);
                 Console.WriteLine($"Request received: {request.RawUrl}");
 
                 // Gather data
-                var data = GatherPerformanceData(
-                    ramCounter,
-                    uptimeCounter,
-                    networkCounters);
+                var data = GatherPerformanceData(ramCounter, uptimeCounter, networkCounters);
 
                 if (request.RawUrl == "/data")
                 {
@@ -168,10 +164,7 @@ namespace PolMon
             WindowsPrincipal principal = new WindowsPrincipal(identity);
             return principal.IsInRole(WindowsBuiltInRole.Administrator);
         }
-        static PerformanceData GatherPerformanceData(
-            PerformanceCounter ramCounter,
-            PerformanceCounter uptimeCounter,
-            PerformanceCounter[] networkCounters)
+        static PerformanceData GatherPerformanceData(PerformanceCounter ramCounter,PerformanceCounter uptimeCounter,PerformanceCounter[] networkCounters)
         {
             var ramAvailable = ramCounter.NextValue();
             var networkUsage = networkCounters.Sum(counter => counter.NextValue());
@@ -206,7 +199,6 @@ namespace PolMon
             };
 
         }
-
         static async Task ServeJsonResponse(HttpListenerResponse response, PerformanceData data)
         {
             var jsonSettings = new JsonSerializerSettings

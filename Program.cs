@@ -90,8 +90,6 @@ namespace PolMon
 
             // Initialize performance counters
             var ramCounter = new PerformanceCounter("Memory", "Available MBytes");
-            var diskReadCounter = new PerformanceCounter("PhysicalDisk", "Disk Read Bytes/sec", "_Total");
-            var diskWriteCounter = new PerformanceCounter("PhysicalDisk", "Disk Write Bytes/sec", "_Total");
             var uptimeCounter = new PerformanceCounter("System", "System Up Time");
             uptimeCounter.NextValue(); // Initialize uptime counter
 
@@ -135,8 +133,6 @@ namespace PolMon
                 var request = context.Request;
 
                 // Initialize counters
-                diskReadCounter.NextValue();
-                diskWriteCounter.NextValue();
                 ramCounter.NextValue();
                 uptimeCounter.NextValue();
                 foreach (var counter in networkCounters)
@@ -149,8 +145,6 @@ namespace PolMon
                 // Gather data
                 var data = GatherPerformanceData(
                     ramCounter,
-                    diskReadCounter,
-                    diskWriteCounter,
                     uptimeCounter,
                     networkCounters);
 
@@ -176,15 +170,11 @@ namespace PolMon
         }
         static PerformanceData GatherPerformanceData(
             PerformanceCounter ramCounter,
-            PerformanceCounter diskReadCounter,
-            PerformanceCounter diskWriteCounter,
             PerformanceCounter uptimeCounter,
             PerformanceCounter[] networkCounters)
         {
             var ramAvailable = ramCounter.NextValue();
             var networkUsage = networkCounters.Sum(counter => counter.NextValue());
-            var diskRead = diskReadCounter.NextValue();
-            var diskWrite = diskWriteCounter.NextValue();
             var pagingUsage = GetPagingFileUsagePercent();
             TimeSpan uptimeSpan = TimeSpan.FromSeconds(uptimeCounter.NextValue());
             var processCount = Process.GetProcesses().Length;

@@ -21,6 +21,8 @@ namespace PolMon
 {
     partial class Program
     {
+        public const string mbVersion = "0.0.0.2";
+
         public static int svPort = 8080;
         public static string svIP = "127.0.0.1";
         public static int svRefreshTime = 500; // in milliseconds
@@ -45,29 +47,29 @@ namespace PolMon
         static async Task Main(string[] args)
         {
 
-#if !DEBUG
-            if (!IsAdministrator())
-            {
-                try
-                {
-                    ProcessStartInfo proc = new ProcessStartInfo
+        #if !DEBUG
+                    if (!IsAdministrator())
                     {
-                        UseShellExecute = true,
-                        WorkingDirectory = Environment.CurrentDirectory,
-                        FileName = Process.GetCurrentProcess().MainModule.FileName,
-                        Verb = "runas"
-                    };
-                    Process.Start(proc);
-                }
-                catch
-                {
-                    Console.WriteLine("This application requires administrator privileges to run.");
-                }
-                Console.ReadKey();
-                Environment.Exit(0);
-                return;
-            }
-#endif
+                        try
+                        {
+                            ProcessStartInfo proc = new ProcessStartInfo
+                            {
+                                UseShellExecute = true,
+                                WorkingDirectory = Environment.CurrentDirectory,
+                                FileName = Process.GetCurrentProcess().MainModule.FileName,
+                                Verb = "runas"
+                            };
+                            Process.Start(proc);
+                        }
+                        catch
+                        {
+                            Console.WriteLine("This application requires administrator privileges to run.");
+                        }
+                        Console.ReadKey();
+                        Environment.Exit(0);
+                        return;
+                    }
+        #endif
 
             MbConsole.ParseArguments(args);
             MbConsole.ConfigureConsole();
@@ -78,7 +80,8 @@ namespace PolMon
             // Initialize performance counters
             var ramCounter = new PerformanceCounter("Memory", "Available MBytes");
             var uptimeCounter = new PerformanceCounter("System", "System Up Time");
-            uptimeCounter.NextValue(); // Initialize uptime counter
+            ramCounter.NextValue();
+            uptimeCounter.NextValue();
 
             // Initialize network counters
             var networkCounters = new PerformanceCounterCategory("Network Interface")

@@ -1,20 +1,26 @@
-﻿<!DOCTYPE html>
+﻿
+<!-- 
+    www.mbnq.pl 2024 
+    https://mbnq.pl/
+    mbnq00 on gmail
+-->
+
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <title>PolMon</title>
     <style>
-        /* Base Styles */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #2b2b2b;
             color: #f0f0f0;
-            background-image: url('mbBackground.webp'); /* Adjust the path if needed */
-            background-size: cover; /* Ensures the image covers the entire background */
-            background-position: center; /* Centers the image */
-            background-repeat: no-repeat; /* Prevents tiling */
-            background-attachment: fixed; /* Keeps the background static when scrolling */
-            min-height: 100vh; /* Ensures the body fills the viewport */
+            background-image: url('mbBackground.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
             margin: 0;
             padding: 0;
         }
@@ -42,7 +48,7 @@
 
         .gauge {
             width: 250px;
-            height: 270px; /* Reduced height to bring labels closer */
+            height: 270px;
             position: relative;
             margin: 10px;
             display: flex;
@@ -52,11 +58,11 @@
 
         .gauge .gauge-container {
             width: 100%;
-            height: 180px; /* Reduced height to bring labels closer */
+            height: 180px;
         }
 
         .gauge-label {
-            margin-top: -25px; /* Negative margin to bring the label even closer */
+            margin-top: -25px; /* Negative margin to bring the label closer */
             font-size: 18px;
             text-align: center;
         }
@@ -84,7 +90,6 @@
                     color: #ffa500;
                 }
 
-        /* Scrollbar Styling */
         ::-webkit-scrollbar {
             width: 10px;
         }
@@ -101,7 +106,6 @@
                 background: #555;
             }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
             .gauges {
                 flex-direction: column;
@@ -113,9 +117,7 @@
             }
         }
     </style>
-    <!-- Include Raphael.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/raphael/2.3.0/raphael.min.js"></script>
-    <!-- Include JustGage -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/justgage/1.3.2/justgage.min.js"></script>
 </head>
 <body>
@@ -171,7 +173,7 @@
 
     <script>
         function getMaxNetworkSpeed() {
-            return 125000000; // Adjust based on your network speed in Bytes/sec
+            return 125000000; // hardcoded for now, 1Gbps
         }
 
         var maxNetworkSpeed = getMaxNetworkSpeed();
@@ -420,7 +422,6 @@
             }
         });
 
-        // Fetch data from the server and update the gauges
         async function fetchData() {
             try {
                 const response = await fetch('/data');

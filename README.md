@@ -1,6 +1,6 @@
 ### PolMon - Funny Mini Server Monitor
 
-Mini server monitoring tool for Windows that provides real-time CPU, GPU, RAM, disk, and network statistics via a simple HTTP server. Designed for system administrators, it uses OpenHardwareMonitor to track hardware performance, including CPU/GPU temperatures and fan speeds. PolMon also serves data in JSON format and has a web-based dashboard
+Mini server monitoring tool for Windows that provides real-time CPU, GPU, RAM, disk, and network statistics via a simple HTTP server. Designed for hobbists, it uses OpenHardwareMonitor to track hardware performance, including CPU/GPU temperatures and fan speeds. PolMon also serves data in JSON format and has a web-based dashboard.
 
 **Usage:**
 ```bash

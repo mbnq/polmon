@@ -8,6 +8,7 @@
 */
 
 using System;
+using System.Diagnostics;
 using System.Net;
 
 namespace PolMon
@@ -42,6 +43,7 @@ namespace PolMon
             Console.WriteLine("  -port <number>    Set the listening port (default: 8080)");
             Console.WriteLine("  -ip <address>     Set the IP address to listen on (default: 127.0.0.1)");
             Console.WriteLine("  -rtime <number>   Set the refresh time in milliseconds (default: 500)");
+            Console.WriteLine("  -local            Open the server in the default web browser when ran locally");
             Console.WriteLine("  -help, --help     Display this help message");
         }
 
@@ -68,6 +70,12 @@ namespace PolMon
                             Program.svRefreshTime = rtime;
                         else
                             Console.WriteLine("Invalid or missing value for -rtime. Using default refresh time 500ms.");
+                        break;
+                    case "-local":
+                        int localPort = Program.svPort > 0 ? Program.svPort : 8080;
+                        string url = $"http://{Program.svIP}:{localPort}";
+                        Console.WriteLine($"Opening local server at {url}");
+                        Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
                         break;
                     case "-help":
                     case "--help":

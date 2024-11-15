@@ -43,7 +43,7 @@ namespace PolMon
             Console.WriteLine("  -port <number>    Set the listening port (default: 8080)");
             Console.WriteLine("  -ip <address>     Set the IP address to listen on (default: 127.0.0.1)");
             Console.WriteLine("  -rtime <number>   Set the refresh time in milliseconds (default: 500)");
-            Console.WriteLine("  -local            Open the server in the default web browser when ran locally");
+            Console.WriteLine("  -local            Open the dashboard in the default web browser automatically when ran locally");
             Console.WriteLine("  -help, --help     Display this help message");
         }
 

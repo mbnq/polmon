@@ -6,9 +6,11 @@ Mini server monitoring tool for Windows that provides real-time CPU, GPU, RAM, d
 ```bash
 polmon.exe [options]
 
--port <number>	Set the listening port	8080
--ip <address>	Set the IP address to listen on	127.0.0.1
--rtime <number>	Set the refresh time in milliseconds	500
+-port <number>	Set the listening port
+-ip <address>	Set the IP address to listen on
+-rtime <number>	Set the refresh time in milliseconds
+-local          Open the dashboard in the default web browser automatically when ran locally
+
 -help, --help	Display this help message	
 ```
 ![image](https://github.com/user-attachments/assets/233ad289-dc83-46d5-9815-09874d986606)
